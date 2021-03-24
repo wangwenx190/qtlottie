@@ -26,6 +26,8 @@ endif()
 
 if(TARGET Qt${QT_VERSION_MAJOR}::Quick)
     list(APPEND SOURCES
+        qtlottieitem.h
+        qtlottieitem.cpp
     )
 endif()
 

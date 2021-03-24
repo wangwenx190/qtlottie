@@ -19,7 +19,7 @@ public:
     explicit QtLottieHelper(QObject *parent = nullptr);
     ~QtLottieHelper() override;
 
-    bool start(const QString &jsonFilePath, const QString resource);
+    bool start(const QString &jsonFilePath, const QString &resource = {});
     void paint(QPainter *painter) const;
 
 private Q_SLOTS:

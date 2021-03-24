@@ -22,7 +22,7 @@ struct rlottie_data {
 
     rlottie_data()
     {
-        QLibrary library(QStringLiteral("aa"));
+        QLibrary library(QStringLiteral("rlottie"));
         lottie_animation_destroy_pfn = reinterpret_cast<lottie_animation_destroy_ptr>(library.resolve("lottie_animation_destroy"));
         lottie_animation_from_data_pfn = reinterpret_cast<lottie_animation_from_data_ptr>(library.resolve("lottie_animation_from_data"));
         lottie_animation_get_framerate_pfn = reinterpret_cast<lottie_animation_get_framerate_ptr>(library.resolve("lottie_animation_get_framerate"));
@@ -68,7 +68,7 @@ QtLottieHelper::~QtLottieHelper()
     }
 }
 
-bool QtLottieHelper::start(const QString &jsonFilePath, const QString resource)
+bool QtLottieHelper::start(const QString &jsonFilePath, const QString &resource)
 {
     Q_ASSERT(rlottie()->lottie_animation_from_data_pfn);
     Q_ASSERT(rlottie()->lottie_animation_get_framerate_pfn);
@@ -128,7 +128,16 @@ void QtLottieHelper::paint(QPainter *painter) const
         char *p = m_frameBuffer.data() + y * img.bytesPerLine();
         memcpy(img.scanLine(y),	p, img.bytesPerLine());
     }
-    painter->drawImage(QPoint{0, 0}, img.scaled(m_window->property("size").toSize()));
+    QSize size = {};
+    if (m_window->isWidgetType()) {
+        size = m_window->property("size").toSize();
+    } else {
+        const qreal w = m_window->property("width").toReal();
+        const qreal h = m_window->property("height").toReal();
+        size = {qRound(w), qRound(h)};
+    }
+    // TODO: let the user be able to set the scale mode.
+    painter->drawImage(QPoint{0, 0}, img.scaled(size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
     painter->restore();
 }
 
@@ -151,5 +160,5 @@ void QtLottieHelper::onTimerTicked()
         ++m_currentFrame;
     }
     m_hasFirstUpdate = true;
-    QMetaObject::invokeMethod(m_window, "update");
+    QMetaObject::invokeMethod(m_window, m_window->isWidgetType() ? "update" : "update2");
 }
