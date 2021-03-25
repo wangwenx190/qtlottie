@@ -2,6 +2,7 @@
 #include "qtlottiehelper.h"
 #include <QtGui/qpainter.h>
 #include <QtCore/qdebug.h>
+#include <QtCore/qcoreapplication.h>
 
 QtLottieWidget::QtLottieWidget(QWidget *parent) : QWidget(parent)
 {
@@ -19,7 +20,7 @@ void QtLottieWidget::setFilePath(const QString &value)
 {
     if (m_filePath != value) {
         m_filePath = value;
-        if (!m_lottieHelper->start(m_filePath)) {
+        if (!m_lottieHelper->start(m_filePath, QCoreApplication::applicationDirPath())) {
             qWarning() << "Failed to start playing.";
         }
         Q_EMIT filePathChanged();

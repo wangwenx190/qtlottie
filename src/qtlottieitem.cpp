@@ -1,6 +1,7 @@
 #include "qtlottieitem.h"
 #include "qtlottiehelper.h"
 #include <QtCore/qdebug.h>
+#include <QtCore/qcoreapplication.h>
 
 QtLottieItem::QtLottieItem(QQuickItem *parent) : QQuickPaintedItem(parent)
 {
@@ -11,6 +12,10 @@ QtLottieItem::~QtLottieItem() = default;
 
 void QtLottieItem::paint(QPainter *painter)
 {
+    Q_ASSERT(!m_lottieHelper.isNull());
+    if (m_lottieHelper.isNull()) {
+        return;
+    }
     Q_ASSERT(painter);
     if (!painter) {
         return;
@@ -36,11 +41,16 @@ void QtLottieItem::setSource(const QUrl &value)
     }
     if (m_source != value) {
         m_source = value;
-        QString path = m_source.toString();
-        // QFile can't recognize url.
-        path.replace(QStringLiteral("qrc:"), QStringLiteral(":"), Qt::CaseInsensitive);
-        path.replace(QStringLiteral(":///"), QStringLiteral(":/"));
-        if (!m_lottieHelper->start(path)) {
+        QString path = {};
+        if (value.scheme() == QStringLiteral("qrc")) {
+            path = m_source.toString();
+            // QFile can't recognize url.
+            path.replace(QStringLiteral("qrc:"), QStringLiteral(":"), Qt::CaseInsensitive);
+            path.replace(QStringLiteral(":///"), QStringLiteral(":/"));
+        } else {
+            path = m_source.isLocalFile() ? m_source.toLocalFile() : m_source.url();
+        }
+        if (!m_lottieHelper->start(path, QCoreApplication::applicationDirPath())) {
             qWarning() << "Failed to start playing.";
         }
         Q_EMIT sourceChanged();
