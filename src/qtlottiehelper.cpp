@@ -30,13 +30,34 @@ struct rlottie_data
 
     rlottie_data()
     {
-        QLibrary library(getRLottieLibraryName());
+        load();
+    }
+
+    void load(const QString &libName = {})
+    {
+        QLibrary library(libName.isEmpty() ? getRLottieLibraryName() : libName);
         lottie_animation_destroy_pfn = reinterpret_cast<lottie_animation_destroy_ptr>(library.resolve("lottie_animation_destroy"));
         lottie_animation_from_data_pfn = reinterpret_cast<lottie_animation_from_data_ptr>(library.resolve("lottie_animation_from_data"));
         lottie_animation_get_framerate_pfn = reinterpret_cast<lottie_animation_get_framerate_ptr>(library.resolve("lottie_animation_get_framerate"));
         lottie_animation_get_totalframe_pfn = reinterpret_cast<lottie_animation_get_totalframe_ptr>(library.resolve("lottie_animation_get_totalframe"));
         lottie_animation_render_pfn = reinterpret_cast<lottie_animation_render_ptr>(library.resolve("lottie_animation_render"));
         lottie_animation_get_size_pfn = reinterpret_cast<lottie_animation_get_size_ptr>(library.resolve("lottie_animation_get_size"));
+    }
+
+    void unload()
+    {
+        lottie_animation_destroy_pfn = nullptr;
+        lottie_animation_from_data_pfn = nullptr;
+        lottie_animation_get_framerate_pfn = nullptr;
+        lottie_animation_get_totalframe_pfn = nullptr;
+        lottie_animation_render_pfn = nullptr;
+        lottie_animation_get_size_pfn = nullptr;
+    }
+
+    void reload(const QString &libName = {})
+    {
+        unload();
+        load(libName);
     }
 
     bool isLoaded() const
@@ -51,10 +72,8 @@ Q_GLOBAL_STATIC(rlottie_data, rlottie)
 
 QtLottieHelper::QtLottieHelper(QObject *parent) : QObject(parent)
 {
-    //Q_ASSERT(rlottie()->isLoaded());
     if (!rlottie()->isLoaded()) {
-        qCritical() << "rlottie not loaded.";
-        return;
+        qWarning() << "rlottie not loaded.";
     }
     connect(&m_timer, &QTimer::timeout, this, &QtLottieHelper::onTimerTicked);
 }
@@ -160,6 +179,12 @@ void QtLottieHelper::paint(QPainter *painter) const
     // TODO: let the user be able to set the scale mode.
     // "Qt::SmoothTransformation" is a must otherwise the scaled image will become fuzzy.
     painter->drawImage(QPoint{0, 0}, needScale ? image.scaled(size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation) : image);
+}
+
+bool QtLottieHelper::reloadRLottie(const QString &fileName) const
+{
+    rlottie()->reload(fileName);
+    return rlottie()->isLoaded();
 }
 
 void QtLottieHelper::onTimerTicked()
