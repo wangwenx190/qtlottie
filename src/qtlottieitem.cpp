@@ -36,7 +36,7 @@ QUrl QtLottieItem::source() const
 void QtLottieItem::setSource(const QUrl &value)
 {
     if (!value.isValid()) {
-        qWarning() << value << "is not valid.";
+        qWarning() << value << "is not a valid URL.";
         return;
     }
     if (m_source != value) {

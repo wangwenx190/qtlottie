@@ -4,6 +4,7 @@
 #include <QtCore/qdebug.h>
 #include <QtCore/qfile.h>
 #include <QtCore/qvariant.h>
+#include <QtCore/qdir.h>
 
 static const char _env_var_rlottie_name[] = "QTLOTTIE_RLOTTIE_NAME";
 
@@ -165,10 +166,14 @@ bool QtLottieHelper::start(const QString &jsonFilePath, const QString &resourceF
     }
     Q_ASSERT(QFile::exists(jsonFilePath));
     if (!QFile::exists(jsonFilePath)) {
-        qWarning() << "JSON file doesn't exist:" << jsonFilePath;
+        qWarning() << jsonFilePath << "doesn't exist.";
         return false;
     }
-    // TODO: check whether "resourceFolderPath" exists or not.
+    Q_ASSERT(QDir(resourceFolderPath).exists());
+    if (!QDir(resourceFolderPath).exists()) {
+        qWarning() << resourceFolderPath << "doesn't exist.";
+        return false;
+    }
     QFile file(jsonFilePath);
     if (!file.open(QFile::ReadOnly | QFile::Text)) {
         qWarning() << "Failed to open the JSON file:" << jsonFilePath;
@@ -275,7 +280,7 @@ void QtLottieHelper::onTimerTicked()
 bool QtLottieHelper::checkParent() const
 {
     const QObject *p = parent();
-    // We assert here because the whole class will not be usable if we don't have a parent.
+    // We assert here because the whole class will not be usable if it has no parent.
     Q_ASSERT(p);
     if (!p) {
         qWarning() << "QtLottieHelper must have a valid parent.";
