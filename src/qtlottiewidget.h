@@ -9,22 +9,22 @@ class QTLOTTIE_API QtLottieWidget : public QWidget
 {
     Q_OBJECT
     Q_DISABLE_COPY_MOVE(QtLottieWidget)
-    Q_PROPERTY(QString filePath READ filePath WRITE setFilePath NOTIFY filePathChanged)
+    Q_PROPERTY(QString source READ source WRITE setSource NOTIFY sourceChanged)
 
 public:
     explicit QtLottieWidget(QWidget *parent = nullptr);
     ~QtLottieWidget() override;
 
-    QString filePath() const;
-    void setFilePath(const QString &value);
+    QString source() const;
+    void setSource(const QString &value);
 
 Q_SIGNALS:
-    void filePathChanged();
+    void sourceChanged();
 
 protected:
     void paintEvent(QPaintEvent *event) override;
 
 private:
     QScopedPointer<QtLottieHelper> m_lottieHelper;
-    QString m_filePath = {};
+    QString m_source = {};
 };

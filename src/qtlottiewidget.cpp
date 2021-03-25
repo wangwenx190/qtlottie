@@ -11,19 +11,19 @@ QtLottieWidget::QtLottieWidget(QWidget *parent) : QWidget(parent)
 
 QtLottieWidget::~QtLottieWidget() = default;
 
-QString QtLottieWidget::filePath() const
+QString QtLottieWidget::source() const
 {
-    return m_filePath;
+    return m_source;
 }
 
-void QtLottieWidget::setFilePath(const QString &value)
+void QtLottieWidget::setSource(const QString &value)
 {
-    if (m_filePath != value) {
-        m_filePath = value;
-        if (!m_lottieHelper->start(m_filePath, QCoreApplication::applicationDirPath())) {
+    if (m_source != value) {
+        m_source = value;
+        if (!m_lottieHelper->start(m_source, QCoreApplication::applicationDirPath())) {
             qWarning() << "Failed to start playing.";
         }
-        Q_EMIT filePathChanged();
+        Q_EMIT sourceChanged();
     }
 }
 

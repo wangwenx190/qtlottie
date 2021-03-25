@@ -20,10 +20,11 @@ using lottie_animation_get_totalframe_ptr = size_t(*)(const Lottie_Animation *an
 using lottie_animation_render_ptr = void(*)(Lottie_Animation *animation, size_t frame_num, uint32_t *buffer, size_t width, size_t height, size_t bytes_per_line);
 using lottie_animation_get_size_ptr = void(*)(const Lottie_Animation *animation, size_t *width, size_t *height);
 
-struct rlottie_data
+class rlottie_data
 {
-    QLibrary rlottieLib;
+    Q_DISABLE_COPY_MOVE(rlottie_data)
 
+public:
     lottie_animation_destroy_ptr lottie_animation_destroy_pfn = nullptr;
     lottie_animation_from_data_ptr lottie_animation_from_data_pfn = nullptr;
     lottie_animation_get_framerate_ptr lottie_animation_get_framerate_pfn = nullptr;
@@ -31,7 +32,7 @@ struct rlottie_data
     lottie_animation_render_ptr lottie_animation_render_pfn = nullptr;
     lottie_animation_get_size_ptr lottie_animation_get_size_pfn = nullptr;
 
-    rlottie_data()
+    explicit rlottie_data()
     {
         const bool result = load();
         Q_UNUSED(result);
@@ -125,6 +126,9 @@ struct rlottie_data
                 && lottie_animation_get_totalframe_pfn && lottie_animation_render_pfn
                 && lottie_animation_get_size_pfn;
     }
+
+private:
+    QLibrary rlottieLib;
 };
 
 Q_GLOBAL_STATIC(rlottie_data, rlottie)
@@ -239,9 +243,12 @@ void QtLottieHelper::paint(QPainter *painter) const
         return;
     }
     const bool needScale = (size != QSize{static_cast<int>(m_width), static_cast<int>(m_height)});
+    painter->save();
+    painter->setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing | QPainter::SmoothPixmapTransform);
     // TODO: let the user be able to set the scale mode.
     // "Qt::SmoothTransformation" is a must otherwise the scaled image will become fuzzy.
     painter->drawImage(QPoint{0, 0}, needScale ? image.scaled(size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation) : image);
+    painter->restore();
 }
 
 bool QtLottieHelper::reloadRLottie(const QString &fileName) const
