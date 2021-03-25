@@ -24,6 +24,10 @@ cmake --install .
 
 See [examples](/examples).
 
+## Limitation
+
+If your JSON uses assets, these files can only be placed on the disk, they can't be compressed or embeded into any container-like thing. It's caused by technical limitation, PRs are  welcome.
+
 ## License
 
 ```text
