@@ -2,8 +2,9 @@
 
 #include "qtlottie_global.h"
 #include <QtQuick/qquickpainteditem.h>
+#include <QtCore/qtimer.h>
 
-class QtLottieHelper;
+class QtLottieDrawEngine;
 
 class QTLOTTIE_API QtLottieItem : public QQuickPaintedItem
 {
@@ -19,7 +20,6 @@ public:
     ~QtLottieItem() override;
 
     void paint(QPainter *painter) override;
-    Q_INVOKABLE void update2();
 
     QUrl source() const;
     void setSource(const QUrl &value);
@@ -28,6 +28,7 @@ Q_SIGNALS:
     void sourceChanged();
 
 private:
-    QScopedPointer<QtLottieHelper> m_lottieHelper;
     QUrl m_source = {};
+    QtLottieDrawEngine *m_drawEngine = nullptr;
+    QTimer m_timer;
 };

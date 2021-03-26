@@ -13,8 +13,11 @@ find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Quick)
 
 set(SOURCES
     qtlottie_global.h
-    qtlottiehelper.h
-    qtlottiehelper.cpp
+    qtlottiedrawengine.h
+    qtlottiedrawenginefactory.h
+    qtlottiedrawenginefactory.cpp
+    qtlottiedrawengine_rlottie.h
+    qtlottiedrawengine_rlottie.cpp
 )
 
 if(TARGET Qt${QT_VERSION_MAJOR}::Widgets)

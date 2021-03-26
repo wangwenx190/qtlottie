@@ -1,31 +1,50 @@
 #include "qtlottieitem.h"
-#include "qtlottiehelper.h"
+#include "qtlottiedrawengine.h"
+#include "qtlottiedrawenginefactory.h"
 #include <QtCore/qdebug.h>
-#include <QtCore/qcoreapplication.h>
 
 QtLottieItem::QtLottieItem(QQuickItem *parent) : QQuickPaintedItem(parent)
 {
-    m_lottieHelper.reset(new QtLottieHelper(this));
+    m_drawEngine = QtLottieDrawEngineFactory::create(QStringLiteral("rlottie"));
+    connect(&m_timer, &QTimer::timeout, this, [this](){
+        if (m_drawEngine) {
+            m_drawEngine->render({qRound(width()), qRound(height())});
+        }
+    });
+    if (m_drawEngine) {
+        connect(m_drawEngine, &QtLottieDrawEngine::needRepaint, this, [this](){
+            update();
+        });
+        connect(m_drawEngine, &QtLottieDrawEngine::frameRateChanged, this, [this](){
+            if (m_timer.isActive()) {
+                m_timer.stop();
+            }
+            m_timer.setInterval(1000 / m_drawEngine->frameRate());
+            m_timer.start();
+        });
+    }
 }
 
-QtLottieItem::~QtLottieItem() = default;
+QtLottieItem::~QtLottieItem()
+{
+    if (m_timer.isActive()) {
+        m_timer.stop();
+    }
+    if (m_drawEngine) {
+        m_drawEngine->release();
+        m_drawEngine = nullptr;
+    }
+}
 
 void QtLottieItem::paint(QPainter *painter)
 {
-    Q_ASSERT(!m_lottieHelper.isNull());
-    if (m_lottieHelper.isNull()) {
-        return;
-    }
     Q_ASSERT(painter);
     if (!painter) {
         return;
     }
-    m_lottieHelper->paint(painter);
-}
-
-void QtLottieItem::update2()
-{
-    update();
+    if (m_drawEngine) {
+        m_drawEngine->paint(painter, {qRound(width()), qRound(height())});
+    }
 }
 
 QUrl QtLottieItem::source() const
@@ -41,17 +60,10 @@ void QtLottieItem::setSource(const QUrl &value)
     }
     if (m_source != value) {
         m_source = value;
-        QString path = {};
-        if (value.scheme() == QStringLiteral("qrc")) {
-            path = m_source.toString();
-            // QFile can't recognize url.
-            path.replace(QStringLiteral("qrc:"), QStringLiteral(":"), Qt::CaseInsensitive);
-            path.replace(QStringLiteral(":///"), QStringLiteral(":/"));
-        } else {
-            path = m_source.isLocalFile() ? m_source.toLocalFile() : m_source.url();
-        }
-        if (!m_lottieHelper->start(path, QCoreApplication::applicationDirPath())) {
-            qWarning() << "Failed to start playing.";
+        if (m_drawEngine) {
+            if (!m_drawEngine->setSource(value)) {
+                qWarning() << "Failed to start playing.";
+            }
         }
         Q_EMIT sourceChanged();
     }
