@@ -138,6 +138,8 @@ QtLottieRLottieEngine::QtLottieRLottieEngine(QObject *parent) : QtLottieDrawEngi
     if (!rlottie()->isLoaded()) {
         qWarning() << "rlottie not loaded.";
     }
+    // Where's the appropriate place to emit this signal?
+    Q_EMIT availableChanged();
 }
 
 QtLottieRLottieEngine::~QtLottieRLottieEngine()
@@ -194,7 +196,7 @@ bool QtLottieRLottieEngine::setSource(const QUrl &value)
         qWarning() << "File is empty:" << jsonFilePath;
         return false;
     }
-    // TODO: support qrc resources.
+    // TODO: support embeded resources.
     const QString resDirPath = QCoreApplication::applicationDirPath();
     m_animation = rlottie()->lottie_animation_from_data_pfn(jsonBuffer.constData(), jsonBuffer.constData(), resDirPath.toUtf8().constData());
     if (!m_animation) {
@@ -205,23 +207,26 @@ bool QtLottieRLottieEngine::setSource(const QUrl &value)
     Q_EMIT sourceChanged();
     rlottie()->lottie_animation_get_size_pfn(m_animation, &m_width, &m_height);
     Q_EMIT sizeChanged();
-    m_frameRate = qRound(rlottie()->lottie_animation_get_framerate_pfn(m_animation));
+    m_frameRate = rlottie()->lottie_animation_get_framerate_pfn(m_animation);
     Q_EMIT frameRateChanged();
-    m_duration = qRound(rlottie()->lottie_animation_get_duration_pfn(m_animation));
+    m_duration = rlottie()->lottie_animation_get_duration_pfn(m_animation);
     Q_EMIT durationChanged();
     m_totalFrame = rlottie()->lottie_animation_get_totalframe_pfn(m_animation);
     m_frameBuffer.reset(new char[m_width * m_height * 32 / 8]);
+    // Clear previous status.
+    m_loopTimes = 0;
+    m_shouldStop = false;
     return true;
 }
 
 int QtLottieRLottieEngine::frameRate() const
 {
-    return m_frameRate;
+    return qRound(m_frameRate);
 }
 
 int QtLottieRLottieEngine::duration() const
 {
-    return m_duration;
+    return qRound(m_duration);
 }
 
 QSize QtLottieRLottieEngine::size() const
@@ -231,12 +236,18 @@ QSize QtLottieRLottieEngine::size() const
 
 int QtLottieRLottieEngine::loops() const
 {
-    return -1;
+    return m_loops;
 }
 
 void QtLottieRLottieEngine::setLoops(const int value)
 {
-    Q_UNUSED(value);
+    if (m_loops != value) {
+        m_loops = value;
+        // Also clear previous status.
+        m_loopTimes = 0;
+        m_shouldStop = false;
+        Q_EMIT loopsChanged();
+    }
 }
 
 bool QtLottieRLottieEngine::available() const
@@ -256,7 +267,10 @@ void QtLottieRLottieEngine::paint(QPainter *painter, const QSize &s)
         return;
     }
     if (!m_animation) {
-        // start() is not called, just ignore this paintEvent.
+        // source is not set, just ignore this paintEvent.
+        return;
+    }
+    if (m_shouldStop) {
         return;
     }
     if (!m_hasFirstUpdate) {
@@ -267,12 +281,11 @@ void QtLottieRLottieEngine::paint(QPainter *painter, const QSize &s)
         char *p = m_frameBuffer.data() + i * image.bytesPerLine();
         memcpy(image.scanLine(i), p, image.bytesPerLine());
     }
-    const bool needScale = (s != size());
     painter->save();
     painter->setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing | QPainter::SmoothPixmapTransform);
     // TODO: let the user be able to set the scale mode.
     // "Qt::SmoothTransformation" is a must otherwise the scaled image will become fuzzy.
-    painter->drawImage(QPoint{0, 0}, needScale ? image.scaled(s, Qt::IgnoreAspectRatio, Qt::SmoothTransformation) : image);
+    painter->drawImage(QPoint{0, 0}, (s == size()) ? image : image.scaled(s, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
     painter->restore();
 }
 
@@ -289,9 +302,21 @@ void QtLottieRLottieEngine::render(const QSize &s)
     if (!m_animation) {
         return;
     }
+    if (m_shouldStop) {
+        return;
+    }
     rlottie()->lottie_animation_render_pfn(m_animation, m_currentFrame, reinterpret_cast<uint32_t *>(m_frameBuffer.data()), m_width, m_height, m_width * 32 / 8);
     if (m_currentFrame >= m_totalFrame) {
         m_currentFrame = 0;
+        // negative number means infinite loops.
+        if (m_loops > 0) {
+            ++m_loopTimes;
+            if (m_loopTimes >= m_loops) {
+                m_loopTimes = 0;
+                m_shouldStop = true;
+                return;
+            }
+        }
     } else {
         ++m_currentFrame;
     }
@@ -301,7 +326,7 @@ void QtLottieRLottieEngine::render(const QSize &s)
 
 void QtLottieRLottieEngine::release()
 {
-    // ref count
+    // TODO: ref count
     delete this;
 }
 

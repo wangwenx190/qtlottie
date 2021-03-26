@@ -42,6 +42,9 @@ private:
     quint64 m_width = 0;
     quint64 m_height = 0;
     bool m_hasFirstUpdate = false;
-    int m_frameRate = 0;
-    int m_duration = 0;
+    double m_frameRate = 0;
+    double m_duration = 0;
+    int m_loops = 0;
+    int m_loopTimes = 0;
+    bool m_shouldStop = false;
 };
