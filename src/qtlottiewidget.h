@@ -17,6 +17,8 @@ public:
     explicit QtLottieWidget(QWidget *parent = nullptr);
     ~QtLottieWidget() override;
 
+    QSize minimumSizeHint() const override;
+
     QUrl source() const;
     void setSource(const QUrl &value);
 

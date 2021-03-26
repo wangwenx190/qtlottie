@@ -50,6 +50,12 @@ QtLottieWidget::~QtLottieWidget()
     }
 }
 
+QSize QtLottieWidget::minimumSizeHint() const
+{
+    // The draw engine will fail to paint if the size of the widget is too small.
+    return {50, 50};
+}
+
 QUrl QtLottieWidget::source() const
 {
     return m_source;

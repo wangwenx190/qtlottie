@@ -202,18 +202,18 @@ bool QtLottieRLottieEngine::setSource(const QUrl &value)
         return false;
     }
     m_source = value;
-    Q_EMIT sourceChanged();
     rlottie()->lottie_animation_get_size_pfn(m_animation, &m_width, &m_height);
-    Q_EMIT sizeChanged();
     m_frameRate = rlottie()->lottie_animation_get_framerate_pfn(m_animation);
-    Q_EMIT frameRateChanged();
     m_duration = rlottie()->lottie_animation_get_duration_pfn(m_animation);
-    Q_EMIT durationChanged();
     m_totalFrame = rlottie()->lottie_animation_get_totalframe_pfn(m_animation);
     m_frameBuffer.reset(new char[m_width * m_height * 32 / 8]);
     // Clear previous status.
     m_loopTimes = 0;
     m_shouldStop = false;
+    Q_EMIT sourceChanged();
+    Q_EMIT sizeChanged();
+    Q_EMIT frameRateChanged();
+    Q_EMIT durationChanged();
     Q_EMIT playingChanged();
     return true;
 }
@@ -298,14 +298,14 @@ void QtLottieRLottieEngine::paint(QPainter *painter, const QSize &s)
 void QtLottieRLottieEngine::render(const QSize &s)
 {
     Q_UNUSED(s);
-    Q_ASSERT(rlottie()->lottie_animation_render_pfn);
-    if (!rlottie()->lottie_animation_render_pfn) {
-        qWarning() << __FUNCTION__ << "some necessary rlottie functions are not available.";
-        return;
-    }
     if (!m_animation) {
         // lottie animation is not created, mostly due to setSource() not called.
         // Or the rlottie library is not loaded. Safe to ignore.
+        return;
+    }
+    Q_ASSERT(rlottie()->lottie_animation_render_pfn);
+    if (!rlottie()->lottie_animation_render_pfn) {
+        qWarning() << __FUNCTION__ << "some necessary rlottie functions are not available.";
         return;
     }
     if (m_shouldStop) {
