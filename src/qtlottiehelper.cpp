@@ -111,14 +111,6 @@ public:
         return true;
     }
 
-    [[nodiscard]] bool reload(const QString &libName = {})
-    {
-        if (!unload()) {
-            return false;
-        }
-        return load(libName);
-    }
-
     [[nodiscard]] bool isLoaded() const
     {
         return rlottieLib.isLoaded() && lottie_animation_destroy_pfn
@@ -249,11 +241,6 @@ void QtLottieHelper::paint(QPainter *painter) const
     // "Qt::SmoothTransformation" is a must otherwise the scaled image will become fuzzy.
     painter->drawImage(QPoint{0, 0}, needScale ? image.scaled(size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation) : image);
     painter->restore();
-}
-
-bool QtLottieHelper::reloadRLottie(const QString &fileName) const
-{
-    return rlottie()->reload(fileName);
 }
 
 void QtLottieHelper::onTimerTicked()

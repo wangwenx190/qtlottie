@@ -21,7 +21,6 @@ public:
 
     bool start(const QString &jsonFilePath, const QString &resourceFolderPath);
     void paint(QPainter *painter) const;
-    bool reloadRLottie(const QString &fileName = {}) const;
 
 private Q_SLOTS:
     void onTimerTicked();
