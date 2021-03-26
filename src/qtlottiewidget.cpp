@@ -22,7 +22,20 @@ QtLottieWidget::QtLottieWidget(QWidget *parent) : QWidget(parent)
             m_timer.stop();
         }
         m_timer.setInterval(1000 / m_drawEngine->frameRate());
-        m_timer.start();
+        if (m_drawEngine->playing()) {
+            m_timer.start();
+        }
+    });
+    connect(m_drawEngine, &QtLottieDrawEngine::playingChanged, this, [this](){
+        if (m_drawEngine->playing()) {
+            if (!m_timer.isActive() && (m_timer.interval() > 0)) {
+                m_timer.start();
+            }
+        } else {
+            if (m_timer.isActive()) {
+                m_timer.stop();
+            }
+        }
     });
 }
 
