@@ -19,7 +19,8 @@ class QTLOTTIE_API QtLottieDrawEngine : public QObject
     Q_PROPERTY(int duration READ duration NOTIFY durationChanged)
     Q_PROPERTY(QSize size READ size NOTIFY sizeChanged)
     Q_PROPERTY(int loops READ loops WRITE setLoops NOTIFY loopsChanged)
-    Q_PROPERTY(bool available READ available NOTIFY availableChanged)
+    Q_PROPERTY(bool available READ available CONSTANT)
+    Q_PROPERTY(bool playing READ playing NOTIFY playingChanged)
 
 public:
     explicit QtLottieDrawEngine(QObject *parent = nullptr) : QObject(parent) {}
@@ -45,13 +46,15 @@ public:
 
     virtual bool available() const = 0;
 
+    virtual bool playing() const = 0;
+
 Q_SIGNALS:
     void sourceChanged();
     void frameRateChanged();
     void durationChanged();
     void sizeChanged();
     void loopsChanged();
-    void availableChanged();
+    void playingChanged();
 
-    void needRepaint();
+    void needsRepaint();
 };

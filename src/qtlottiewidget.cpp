@@ -12,9 +12,11 @@ QtLottieWidget::QtLottieWidget(QWidget *parent) : QWidget(parent)
         return;
     }
     connect(&m_timer, &QTimer::timeout, this, [this](){
-        m_drawEngine->render(size());
+        if (m_drawEngine->playing()) {
+            m_drawEngine->render(size());
+        }
     });
-    connect(m_drawEngine, &QtLottieDrawEngine::needRepaint, this, qOverload<>(&QtLottieWidget::update));
+    connect(m_drawEngine, &QtLottieDrawEngine::needsRepaint, this, qOverload<>(&QtLottieWidget::update));
     connect(m_drawEngine, &QtLottieDrawEngine::frameRateChanged, this, [this](){
         if (m_timer.isActive()) {
             m_timer.stop();

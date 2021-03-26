@@ -136,10 +136,8 @@ Q_GLOBAL_STATIC(rlottie_data, rlottie)
 QtLottieRLottieEngine::QtLottieRLottieEngine(QObject *parent) : QtLottieDrawEngine(parent)
 {
     if (!rlottie()->isLoaded()) {
-        qWarning() << "rlottie not loaded.";
+        qWarning() << "rlottie library not loaded.";
     }
-    // Where's the appropriate place to emit this signal?
-    Q_EMIT availableChanged();
 }
 
 QtLottieRLottieEngine::~QtLottieRLottieEngine()
@@ -159,7 +157,7 @@ bool QtLottieRLottieEngine::setSource(const QUrl &value)
     if (!rlottie()->lottie_animation_from_data_pfn || !rlottie()->lottie_animation_get_framerate_pfn
             || !rlottie()->lottie_animation_get_totalframe_pfn || !rlottie()->lottie_animation_get_size_pfn
             || !rlottie()->lottie_animation_get_duration_pfn) {
-        qWarning() << "rlottie is not loaded.";
+        qWarning() << __FUNCTION__ << "some necessary rlottie functions are not available.";
         return false;
     }
     Q_ASSERT(value.isValid());
@@ -216,6 +214,7 @@ bool QtLottieRLottieEngine::setSource(const QUrl &value)
     // Clear previous status.
     m_loopTimes = 0;
     m_shouldStop = false;
+    Q_EMIT playingChanged();
     return true;
 }
 
@@ -243,16 +242,22 @@ void QtLottieRLottieEngine::setLoops(const int value)
 {
     if (m_loops != value) {
         m_loops = value;
+        Q_EMIT loopsChanged();
         // Also clear previous status.
         m_loopTimes = 0;
         m_shouldStop = false;
-        Q_EMIT loopsChanged();
+        Q_EMIT playingChanged();
     }
 }
 
 bool QtLottieRLottieEngine::available() const
 {
     return rlottie()->isLoaded();
+}
+
+bool QtLottieRLottieEngine::playing() const
+{
+    return (m_animation && !m_shouldStop);
 }
 
 void QtLottieRLottieEngine::paint(QPainter *painter, const QSize &s)
@@ -267,7 +272,8 @@ void QtLottieRLottieEngine::paint(QPainter *painter, const QSize &s)
         return;
     }
     if (!m_animation) {
-        // source is not set, just ignore this paintEvent.
+        // lottie animation is not created, mostly due to setSource() not called.
+        // Or the rlottie library is not loaded. Safe to ignore.
         return;
     }
     if (m_shouldStop) {
@@ -294,12 +300,12 @@ void QtLottieRLottieEngine::render(const QSize &s)
     Q_UNUSED(s);
     Q_ASSERT(rlottie()->lottie_animation_render_pfn);
     if (!rlottie()->lottie_animation_render_pfn) {
-        qWarning() << "rlottie not loaded.";
+        qWarning() << __FUNCTION__ << "some necessary rlottie functions are not available.";
         return;
     }
-    // We assert here because we can't continue executing this function if the animation is not created.
-    Q_ASSERT(m_animation);
     if (!m_animation) {
+        // lottie animation is not created, mostly due to setSource() not called.
+        // Or the rlottie library is not loaded. Safe to ignore.
         return;
     }
     if (m_shouldStop) {
@@ -314,6 +320,7 @@ void QtLottieRLottieEngine::render(const QSize &s)
             if (m_loopTimes >= m_loops) {
                 m_loopTimes = 0;
                 m_shouldStop = true;
+                Q_EMIT playingChanged();
                 return;
             }
         }
@@ -321,7 +328,7 @@ void QtLottieRLottieEngine::render(const QSize &s)
         ++m_currentFrame;
     }
     m_hasFirstUpdate = true;
-    Q_EMIT needRepaint();
+    Q_EMIT needsRepaint();
 }
 
 void QtLottieRLottieEngine::release()

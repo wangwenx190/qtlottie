@@ -11,9 +11,11 @@ QtLottieItem::QtLottieItem(QQuickItem *parent) : QQuickPaintedItem(parent)
         return;
     }
     connect(&m_timer, &QTimer::timeout, this, [this](){
-        m_drawEngine->render({qRound(width()), qRound(height())});
+        if (m_drawEngine->playing()) {
+            m_drawEngine->render({qRound(width()), qRound(height())});
+        }
     });
-    connect(m_drawEngine, &QtLottieDrawEngine::needRepaint, this, [this](){
+    connect(m_drawEngine, &QtLottieDrawEngine::needsRepaint, this, [this](){
         update();
     });
     connect(m_drawEngine, &QtLottieDrawEngine::frameRateChanged, this, [this](){

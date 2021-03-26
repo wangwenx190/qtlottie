@@ -33,6 +33,8 @@ public:
 
     bool available() const override;
 
+    bool playing() const override;
+
 private:
     QUrl m_source = {};
     Lottie_Animation *m_animation = nullptr;
