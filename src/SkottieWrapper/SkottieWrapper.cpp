@@ -59,6 +59,37 @@ Skottie_Animation* skottie_animation_fromdata(void *data, size_t data_size, cons
     return reinterpret_cast<Skottie_Animation*>(ani);
 }
 
+void skottie_animation_get_size(const Skottie_Animation *animation, size_t *width, size_t *height)
+{
+    const Skottie_Animation_Private *pAni =
+            reinterpret_cast<const Skottie_Animation_Private*>(animation);
+    auto view_size = pAni->ani->size();
+    *width = static_cast<size_t>(view_size.width());
+    *height = static_cast<size_t>(view_size.height());
+    return;
+}
+
+double skottie_animation_get_duration(const Skottie_Animation *animation)
+{
+    const Skottie_Animation_Private *pAni =
+            reinterpret_cast<const Skottie_Animation_Private*>(animation);
+    return pAni->ani->duration();
+}
+
+size_t skottie_animation_get_totalframe(const Skottie_Animation *animation)
+{
+    const Skottie_Animation_Private *pAni =
+            reinterpret_cast<const Skottie_Animation_Private*>(animation);
+    return static_cast<size_t>(pAni->ani->duration() * pAni->ani->fps());
+}
+
+double skottie_animation_get_framerate(const Skottie_Animation *animation)
+{
+    const Skottie_Animation_Private *pAni =
+            reinterpret_cast<const Skottie_Animation_Private*>(animation);
+    return pAni->ani->fps();
+}
+
 Skottie_Pixmap* skottie_new_pixmap()
 {
     return  reinterpret_cast<Skottie_Pixmap*>(new SkPixmap{});

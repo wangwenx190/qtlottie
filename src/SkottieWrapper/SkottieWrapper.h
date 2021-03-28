@@ -22,7 +22,7 @@ typedef void Skottie_Pixmap;
  *
  *  @see skottie_animation_destroy()
  *
- *  @ingroup Lottie_Animation
+ *  @ingroup Skottie_Animation
  *  @internal
  */
 SKOTTIE_API
@@ -39,11 +39,76 @@ Skottie_Animation* skottie_animation_from_file(const char* path, const char* res
  *  @return Animation object that can build the contents of the
  *          Lottie resource represented by JSON string data.
  *
- *  @ingroup Lottie_Animation
+ *  @ingroup Skottie_Animation
  *  @internal
  */
 SKOTTIE_API
 Skottie_Animation* skottie_animation_fromdata(void *data, size_t data_size, const char *resource);
+
+
+/**
+ *  @brief Returns default viewport size of the Lottie resource.
+ *
+ *  @param[in] animation Animation object.
+ *  @param[out] w default width of the viewport.
+ *  @param[out] h default height of the viewport.
+ *
+ *  @ingroup Skottie_Animation
+ *  @internal
+ */
+SKOTTIE_API
+void skottie_animation_get_size(const Skottie_Animation *animation, size_t *width, size_t *height);
+
+/**
+ *  @brief Returns total animation duration of Lottie resource in second.
+ *         it uses totalFrame() and frameRate() to calculate the duration.
+ *         duration = totalFrame() / frameRate().
+ *
+ *  @param[in] animation Animation object.
+ *
+ *  @return total animation duration in second.
+ *          @c 0 if the Lottie resource has no animation.
+ *
+ *  @see skottie_animation_get_totalframe()
+ *  @see skottie_animation_get_framerate()
+ *
+ *  @ingroup Skottie_Animation
+ *  @internal
+ */
+SKOTTIE_API
+double skottie_animation_get_duration(const Skottie_Animation *animation);
+
+/**
+ *  @brief Returns total number of frames present in the Lottie resource.
+ *
+ *  @param[in] animation Animation object.
+ *
+ *  @return frame count of the Lottie resource.*
+ *
+ *  @note frame number starts with 0.
+ *
+ *  @see skottie_animation_get_duration()
+ *  @see skottie_animation_get_framerate()
+ *
+ *  @ingroup Skottie_Animation
+ *  @internal
+ */
+SKOTTIE_API
+size_t skottie_animation_get_totalframe(const Skottie_Animation *animation);
+
+/**
+ *  @brief Returns default framerate of the Lottie resource.
+ *
+ *  @param[in] animation Animation object.
+ *
+ *  @return framerate of the Lottie resource
+ *
+ *  @ingroup Skottie_Animation
+ *  @internal
+ *
+ */
+SKOTTIE_API
+double skottie_animation_get_framerate(const Skottie_Animation *animation);
 
 /**
  *  @brief Constructs an pixmap object.
@@ -92,10 +157,10 @@ void skottie_delete_pixmap(Skottie_Pixmap* pixmap);
  *  @param[in] pixmap surface buffer use for rendering.
  *
  *
- *  @ingroup Lottie_Animation
+ *  @ingroup Skottie_Animation
  *  @internal
  */
-RLOTTIE_API void skottie_animation_render(Skottie_Animation *animation,
+SKOTTIE_API void skottie_animation_render(Skottie_Animation *animation,
                                           size_t frame_num,
                                           Skottie_Pixmap *pixmap);
 
@@ -107,7 +172,7 @@ RLOTTIE_API void skottie_animation_render(Skottie_Animation *animation,
  *  @see lottie_animation_from_file()
  *  @see lottie_animation_from_data()
  *
- *  @ingroup Lottie_Animation
+ *  @ingroup Skottie_Animation
  *  @internal
  */
 SKOTTIE_API
