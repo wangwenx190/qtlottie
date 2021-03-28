@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 3.19)
 
-project(QtLottie LANGUAGES CXX)
+project(libQtLottie LANGUAGES CXX)
 
 option(BUILD_EXAMPLES "Build QtLottie demo applications." ON)
+option(BUILD_SKOTTIE_WARPPER "Build skottie wrapper." ON)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

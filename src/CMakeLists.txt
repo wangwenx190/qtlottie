@@ -4,6 +4,10 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
+if(BUILD_SKOTTIE_WARPPER)
+    add_subdirectory(SkottieWrapper)
+endif()
+
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Gui REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Gui REQUIRED)
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets)

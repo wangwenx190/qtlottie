@@ -18,5 +18,5 @@ add_executable(quick WIN32 ${SOURCES})
 target_link_libraries(quick PRIVATE
     Qt${QT_VERSION_MAJOR}::Quick
     Qt${QT_VERSION_MAJOR}::QuickControls2
-    wangwenx190::QtLottie
+    wangwenx190::libQtLottie
 )

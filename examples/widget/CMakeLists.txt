@@ -18,5 +18,5 @@ add_executable(widget WIN32 ${SOURCES})
 
 target_link_libraries(widget PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
-    wangwenx190::QtLottie
+    wangwenx190::libQtLottie
 )
