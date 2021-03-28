@@ -4,10 +4,11 @@
 #include "include/core/SkPictureRecorder.h"
 #include "include/core/SkStream.h"
 #include "include/core/SkSurface.h"
+#include  "include/core/SkImageInfo.h"
 #include "src/utils/SkOSPath.h"
 #include "include/encode/SkPngEncoder.h"
 #include "modules/skottie/include/Skottie.h"
-
+#include <windows.h>
 struct Skottie_Animation_Private
 {
     sk_sp<skresources::CachingResourceProvider> rp;
@@ -95,6 +96,12 @@ Skottie_Pixmap* skottie_new_pixmap()
     return  reinterpret_cast<Skottie_Pixmap*>(new SkPixmap{});
 }
 
+Skottie_Pixmap* skottie_new_pixmap_wh(size_t width, size_t height, void *buffer)
+{
+    auto imgInfo = SkImageInfo::Make(width, height, SkColorType::kBGRA_8888_SkColorType, SkAlphaType::kUnpremul_SkAlphaType);
+    return  reinterpret_cast<Skottie_Pixmap*>(new SkPixmap(imgInfo, buffer, width * 4));
+}
+
 const void* skottie_get_pixmap_buffer(Skottie_Pixmap* pixmap)
 {
     SkPixmap *skPixmap = reinterpret_cast<SkPixmap*>(pixmap);
@@ -124,6 +131,29 @@ void skottie_animation_render(Skottie_Animation *animation,
 
     auto img = pAni->surface->makeImageSnapshot();
     img->peekPixels(reinterpret_cast<SkPixmap*>(pixmap));
+    return;
+}
+
+void skottie_animation_render_scale(Skottie_Animation *animation,
+                                            size_t frame_num,
+                                    Skottie_Pixmap *pixmap)
+{
+    if(!animation)
+        return;
+    Skottie_Animation_Private *pAni =
+            reinterpret_cast<Skottie_Animation_Private*>(animation);
+    auto canvas = pAni->surface->getCanvas();
+
+    if(!canvas)
+        return;
+    canvas->clear(SkColorSetARGB(0,0,0,0));
+
+    pAni->ani->seekFrame(static_cast<double>(frame_num));
+    pAni->ani->render(canvas);
+
+    auto img = pAni->surface->makeImageSnapshot();
+    SkSamplingOptions opt(SkFilterMode::kNearest, SkMipmapMode::kNone);
+    img->scalePixels(*reinterpret_cast<SkPixmap*>(pixmap), opt);
     return;
 }
 

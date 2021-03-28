@@ -123,6 +123,23 @@ double skottie_animation_get_framerate(const Skottie_Animation *animation);
 SKOTTIE_API
 Skottie_Pixmap* skottie_new_pixmap();
 
+/**
+ *  @brief Constructs an pixmap object with width,height.
+ *
+ *  @param[in] width the width of pixmap.
+ *  @param[in] height the height of pixmap.
+ *  @param[in] buffer to store pixmap data
+ *
+ *  @return Pixmap object that store frame data
+ *
+ *  @see skottie_delete_pixmap()
+ *
+ *  @ingroup Skottie_Pixmap
+ *  @internal
+ */
+SKOTTIE_API
+Skottie_Pixmap* skottie_new_pixmap_wh(size_t width, size_t height, void *buffer);
+
 
 /**
  *  @brief Get pixmap buffer from a Skottie_Pixmap object.
@@ -161,6 +178,22 @@ void skottie_delete_pixmap(Skottie_Pixmap* pixmap);
  *  @internal
  */
 SKOTTIE_API void skottie_animation_render(Skottie_Animation *animation,
+                                          size_t frame_num,
+                                          Skottie_Pixmap *pixmap);
+
+/**
+ *  @brief Request to render scale the content of the frame @p frame_num to buffer @p buffer.
+ *
+ *
+ *  @param[in] animation Animation object.
+ *  @param[in] frame_num the frame number needs to be rendered.
+ *  @param[in] pixmap surface buffer use for rendering.
+ *
+ *
+ *  @ingroup Skottie_Animation
+ *  @internal
+ */
+SKOTTIE_API void skottie_animation_render_scale(Skottie_Animation *animation,
                                           size_t frame_num,
                                           Skottie_Pixmap *pixmap);
 
