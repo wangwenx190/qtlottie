@@ -202,7 +202,9 @@ bool QtLottieRLottieEngine::setSource(const QUrl &value)
         return false;
     }
     m_source = value;
-    rlottie()->lottie_animation_get_size_pfn(m_animation, &m_width, &m_height);
+    rlottie()->lottie_animation_get_size_pfn(m_animation,
+                                             reinterpret_cast<size_t*>(&m_width),
+                                             reinterpret_cast<size_t*>(&m_height));
     m_frameRate = rlottie()->lottie_animation_get_framerate_pfn(m_animation);
     m_duration = rlottie()->lottie_animation_get_duration_pfn(m_animation);
     m_totalFrame = rlottie()->lottie_animation_get_totalframe_pfn(m_animation);
