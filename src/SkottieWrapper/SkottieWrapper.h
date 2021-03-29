@@ -1,10 +1,16 @@
 #ifndef SKOTTIEWRAPPER_H
 #define SKOTTIEWRAPPER_H
 
-#ifdef SKOTTIEWRAPPER_LIBRARY_BUILD
-#define SKOTTIE_API __declspec(dllexport)
+#ifdef __cplusplus
+#define SKOTTIE_EXTERN extern "C"
 #else
-#define SKOTTIE_API __declspec(dllimport)
+#define SKOTTIE_EXTERN
+#endif
+
+#ifdef SKOTTIEWRAPPER_LIBRARY_BUILD
+#define SKOTTIE_API SKOTTIE_EXTERN __declspec(dllexport)
+#else
+#define SKOTTIE_API SKOTTIE_EXTERN __declspec(dllimport)
 #endif
 
 typedef void Skottie_Animation;
