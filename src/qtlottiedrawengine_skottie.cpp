@@ -235,8 +235,8 @@ void QtLottieSkottieEngine::paint(QPainter *painter, const QSize &s)
     skottie()->skottie_animation_render_scale_pfn(m_animation, m_currentFrame, pixmap);
     const void *addr = skottie()->skottie_get_pixmap_buffer_pfn(pixmap);
     QImage image(width, height, QImage::Format_ARGB32);
-    for (int i = 0; i != static_cast<int>(height); ++i) {
-        const char *p = static_cast<const char*>(addr) + i * image.bytesPerLine();
+    for (int i = 0; i != height; ++i) {
+        const char *p = static_cast<const char *>(addr) + i * image.bytesPerLine();
         memcpy(image.scanLine(i), p, image.bytesPerLine());
     }
     skottie()->skottie_delete_pixmap_pfn(pixmap);
