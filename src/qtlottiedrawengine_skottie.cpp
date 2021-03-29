@@ -294,12 +294,14 @@ QUrl QtLottieSkottieEngine::source() const
 
 bool QtLottieSkottieEngine::setSource(const QUrl &value)
 {
-    Q_ASSERT(skottie()->skottie_animation_from_file_pfn);
+    Q_ASSERT(skottie()->skottie_animation_from_data_pfn);
     Q_ASSERT(skottie()->skottie_animation_get_size_pfn);
     Q_ASSERT(skottie()->skottie_animation_get_framerate_pfn);
+    Q_ASSERT(skottie()->skottie_animation_get_duration_pfn);
     Q_ASSERT(skottie()->skottie_animation_get_totalframe_pfn);
-    if (!skottie()->skottie_animation_from_file_pfn || !skottie()->skottie_animation_get_size_pfn
-        || !skottie()->skottie_animation_get_framerate_pfn || !skottie()->skottie_animation_get_totalframe_pfn) {
+    if (!skottie()->skottie_animation_from_data_pfn || !skottie()->skottie_animation_get_size_pfn
+        || !skottie()->skottie_animation_get_framerate_pfn || !skottie()->skottie_animation_get_duration_pfn
+        || !skottie()->skottie_animation_get_totalframe_pfn) {
         qWarning() << Q_FUNC_INFO << "some necessary skottie functions are not available.";
         return false;
     }
