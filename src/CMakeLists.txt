@@ -16,6 +16,8 @@ set(SOURCES
     qtlottiedrawengine.h
     qtlottiedrawenginefactory.h
     qtlottiedrawenginefactory.cpp
+    qtlottiedrawengine_skottie.h
+    qtlottiedrawengine_skottie.cpp
     qtlottiedrawengine_rlottie.h
     qtlottiedrawengine_rlottie.cpp
 )

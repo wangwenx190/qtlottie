@@ -2,16 +2,17 @@
 
 #include "qtlottiedrawengine.h"
 
-struct Lottie_Animation;
+using Skottie_Animation = void;
+using Skottie_Pixmap = void;
 
-class QTLOTTIE_API QtLottieRLottieEngine : public QtLottieDrawEngine
+class QTLOTTIE_API QtLottieSkottieEngine : public QtLottieDrawEngine
 {
     Q_OBJECT
-    Q_DISABLE_COPY_MOVE(QtLottieRLottieEngine)
+    Q_DISABLE_COPY_MOVE(QtLottieSkottieEngine)
 
 public:
-    explicit QtLottieRLottieEngine(QObject *parent = nullptr);
-    ~QtLottieRLottieEngine() override;
+    explicit QtLottieSkottieEngine(QObject *parent = nullptr);
+    ~QtLottieSkottieEngine() override;
 
     void paint(QPainter *painter, const QSize &s) override;
     void render(const QSize &s) override;
@@ -41,8 +42,7 @@ public Q_SLOTS:
 
 private:
     QUrl m_source = {};
-    Lottie_Animation *m_animation = nullptr;
-    QScopedArrayPointer<char> m_frameBuffer;
+    Skottie_Animation *m_animation = nullptr;
     quint64 m_currentFrame = 0;
     quint64 m_totalFrame = 0;
     quint64 m_width = 0;

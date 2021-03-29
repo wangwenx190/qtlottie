@@ -8,7 +8,7 @@ Widget::Widget(QWidget *parent) : QWidget(parent)
     const auto l = new QVBoxLayout(this);
     l->addWidget(lottieWidget);
     setLayout(l);
-    lottieWidget->setSource(QUrl(QStringLiteral("qrc:///lottie/46472-lurking-cat.json")));
+    lottieWidget->setSource(QUrl(QStringLiteral("qrc:///lottie/43721-keywords.json")));
 }
 
 Widget::~Widget() = default;

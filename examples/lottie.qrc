@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="/">
     <file>lottie/46472-lurking-cat.json</file>
+    <file>lottie/43721-keywords.json</file>
   </qresource>
 </RCC>

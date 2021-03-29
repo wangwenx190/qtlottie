@@ -157,7 +157,7 @@ bool QtLottieRLottieEngine::setSource(const QUrl &value)
     if (!rlottie()->lottie_animation_from_data_pfn || !rlottie()->lottie_animation_get_framerate_pfn
             || !rlottie()->lottie_animation_get_totalframe_pfn || !rlottie()->lottie_animation_get_size_pfn
             || !rlottie()->lottie_animation_get_duration_pfn) {
-        qWarning() << __FUNCTION__ << "some necessary rlottie functions are not available.";
+        qWarning() << Q_FUNC_INFO << "some necessary rlottie functions are not available.";
         return false;
     }
     Q_ASSERT(value.isValid());
@@ -202,14 +202,13 @@ bool QtLottieRLottieEngine::setSource(const QUrl &value)
         return false;
     }
     m_source = value;
-    rlottie()->lottie_animation_get_size_pfn(m_animation,
-                                             reinterpret_cast<size_t*>(&m_width),
-                                             reinterpret_cast<size_t*>(&m_height));
+    rlottie()->lottie_animation_get_size_pfn(m_animation, reinterpret_cast<size_t *>(&m_width), reinterpret_cast<size_t *>(&m_height));
     m_frameRate = rlottie()->lottie_animation_get_framerate_pfn(m_animation);
     m_duration = rlottie()->lottie_animation_get_duration_pfn(m_animation);
     m_totalFrame = rlottie()->lottie_animation_get_totalframe_pfn(m_animation);
     m_frameBuffer.reset(new char[m_width * m_height * 32 / 8]);
     // Clear previous status.
+    m_currentFrame = 0;
     m_loopTimes = 0;
     m_shouldStop = false;
     Q_EMIT sourceChanged();
@@ -262,6 +261,16 @@ bool QtLottieRLottieEngine::playing() const
     return (m_animation && !m_shouldStop);
 }
 
+void QtLottieRLottieEngine::pause()
+{
+
+}
+
+void QtLottieRLottieEngine::resume()
+{
+
+}
+
 void QtLottieRLottieEngine::paint(QPainter *painter, const QSize &s)
 {
     Q_ASSERT(painter);
@@ -307,7 +316,7 @@ void QtLottieRLottieEngine::render(const QSize &s)
     }
     Q_ASSERT(rlottie()->lottie_animation_render_pfn);
     if (!rlottie()->lottie_animation_render_pfn) {
-        qWarning() << __FUNCTION__ << "some necessary rlottie functions are not available.";
+        qWarning() << Q_FUNC_INFO << "some necessary rlottie functions are not available.";
         return;
     }
     if (m_shouldStop) {

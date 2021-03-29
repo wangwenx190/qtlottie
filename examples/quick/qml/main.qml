@@ -10,6 +10,6 @@ Window {
 
     QtLottieItem {
         anchors.fill: parent
-        source: "qrc:///lottie/46472-lurking-cat.json"
+        source: "qrc:///lottie/43721-keywords.json"
     }
 }

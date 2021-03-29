@@ -6,11 +6,24 @@
 
 QtLottieWidget::QtLottieWidget(QWidget *parent) : QWidget(parent)
 {
-    m_drawEngine = QtLottieDrawEngineFactory::create(QStringLiteral("rlottie"));
-    if (!m_drawEngine) {
-        qWarning() << "Failed to create the draw engine.";
-        return;
+    m_drawEngine = QtLottieDrawEngineFactory::create("skottie");
+    if (!m_drawEngine || !m_drawEngine->available()) {
+        qWarning() << "Failed to create the skottie backend.";
+        if (m_drawEngine) {
+            m_drawEngine->release();
+            m_drawEngine = nullptr;
+        }
+        m_drawEngine = QtLottieDrawEngineFactory::create("rlottie");
+        if (!m_drawEngine || !m_drawEngine->available()) {
+            qWarning() << "Failed to create the rlottie backend.";
+            if (m_drawEngine) {
+                m_drawEngine->release();
+                m_drawEngine = nullptr;
+            }
+            return;
+        }
     }
+    m_timer.setTimerType(Qt::PreciseTimer);
     connect(&m_timer, &QTimer::timeout, this, [this](){
         if (m_drawEngine->playing()) {
             m_drawEngine->render(size());

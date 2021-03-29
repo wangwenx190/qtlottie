@@ -48,6 +48,10 @@ public:
 
     virtual bool playing() const = 0;
 
+public Q_SLOTS:
+    virtual void pause() = 0;
+    virtual void resume() = 0;
+
 Q_SIGNALS:
     void sourceChanged();
     void frameRateChanged();

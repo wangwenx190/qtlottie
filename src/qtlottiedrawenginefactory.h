@@ -7,6 +7,6 @@ class QtLottieDrawEngine;
 namespace QtLottieDrawEngineFactory
 {
 
-QTLOTTIE_API QtLottieDrawEngine *create(const QString &name);
+QTLOTTIE_API QtLottieDrawEngine *create(const char *name);
 
 }
