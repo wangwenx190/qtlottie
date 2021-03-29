@@ -3,17 +3,17 @@
 #include <QtCore/qdebug.h>
 #include <QtCore/qcoreapplication.h>
 #include <QtGui/qpainter.h>
-#include <QtCore/qfileinfo.h>
+#include <QtCore/qfile.h>
 
 static const char _env_var_skottie_name[] = "QTLOTTIE_SKOTTIE_NAME";
 
 static inline QString getSkottieLibraryName()
 {
-    return qEnvironmentVariable(_env_var_skottie_name, QStringLiteral("skottie"));
+    return qEnvironmentVariable(_env_var_skottie_name, QStringLiteral("skottiewrapper"));
 }
 
 using skottie_animation_from_file_ptr = Skottie_Animation*(*)(const char *path, const char *resource);
-using skottie_animation_fromdata_ptr = Skottie_Animation*(*)(void *data, size_t data_size, const char *resource);
+using skottie_animation_from_data_ptr = Skottie_Animation*(*)(void *data, size_t data_size, const char *resource);
 using skottie_animation_get_size_ptr = void(*)(const Skottie_Animation *animation, size_t *width, size_t *height);
 using skottie_animation_get_duration_ptr = double(*)(const Skottie_Animation *animation);
 using skottie_animation_get_totalframe_ptr = size_t(*)(const Skottie_Animation *animation);
@@ -32,7 +32,7 @@ class skottie_data
 
 public:
     skottie_animation_from_file_ptr skottie_animation_from_file_pfn = nullptr;
-    skottie_animation_fromdata_ptr skottie_animation_fromdata_pfn = nullptr;
+    skottie_animation_from_data_ptr skottie_animation_from_data_pfn = nullptr;
     skottie_animation_get_size_ptr skottie_animation_get_size_pfn = nullptr;
     skottie_animation_get_duration_ptr skottie_animation_get_duration_pfn = nullptr;
     skottie_animation_get_totalframe_ptr skottie_animation_get_totalframe_pfn = nullptr;
@@ -77,9 +77,9 @@ public:
             qWarning() << "skottie_animation_from_file_pfn is null:" << skottieLib.errorString();
         }
 
-        skottie_animation_fromdata_pfn = reinterpret_cast<skottie_animation_fromdata_ptr>(skottieLib.resolve("skottie_animation_fromdata"));
-        if (!skottie_animation_fromdata_pfn) {
-            qWarning() << "skottie_animation_fromdata_pfn is null:" << skottieLib.errorString();
+        skottie_animation_from_data_pfn = reinterpret_cast<skottie_animation_from_data_ptr>(skottieLib.resolve("skottie_animation_from_data"));
+        if (!skottie_animation_from_data_pfn) {
+            qWarning() << "skottie_animation_from_data_pfn is null:" << skottieLib.errorString();
         }
 
         skottie_animation_get_size_pfn = reinterpret_cast<skottie_animation_get_size_ptr>(skottieLib.resolve("skottie_animation_get_size"));
@@ -143,7 +143,7 @@ public:
     [[nodiscard]] bool unload()
     {
         skottie_animation_from_file_pfn = nullptr;
-        skottie_animation_fromdata_pfn = nullptr;
+        skottie_animation_from_data_pfn = nullptr;
         skottie_animation_get_size_pfn = nullptr;
         skottie_animation_get_duration_pfn = nullptr;
         skottie_animation_get_totalframe_pfn = nullptr;
@@ -169,7 +169,7 @@ public:
     [[nodiscard]] bool isLoaded() const
     {
         return skottieLib.isLoaded() && skottie_animation_from_file_pfn
-               && skottie_animation_fromdata_pfn && skottie_animation_get_size_pfn
+               && skottie_animation_from_data_pfn && skottie_animation_get_size_pfn
                && skottie_animation_get_duration_pfn && skottie_animation_get_totalframe_pfn
                && skottie_animation_get_framerate_pfn && skottie_new_pixmap_pfn
                && skottie_new_pixmap_wh_pfn && skottie_get_pixmap_buffer_pfn
@@ -315,19 +315,31 @@ bool QtLottieSkottieEngine::setSource(const QUrl &value)
     QString jsonFilePath = {};
     if (value.scheme() == QStringLiteral("qrc")) {
         jsonFilePath = value.toString();
-        //
+        // QFile can't recognize url.
         jsonFilePath.replace(QStringLiteral("qrc:"), QStringLiteral(":"), Qt::CaseInsensitive);
         jsonFilePath.replace(QStringLiteral(":///"), QStringLiteral(":/"));
     } else {
         jsonFilePath = value.isLocalFile() ? value.toLocalFile() : value.url();
     }
-    Q_ASSERT(QFileInfo::exists(jsonFilePath));
-    if (!QFileInfo::exists(jsonFilePath)) {
+    Q_ASSERT(QFile::exists(jsonFilePath));
+    if (!QFile::exists(jsonFilePath)) {
         qWarning() << jsonFilePath << "doesn't exist.";
         return false;
     }
+    QFile file(jsonFilePath);
+    if (!file.open(QFile::ReadOnly | QFile::Text)) {
+        qWarning() << "Failed to open the JSON file:" << jsonFilePath;
+        return false;
+    }
+    const QByteArray jsonBuffer = file.readAll();
+    file.close();
+    if (jsonBuffer.isEmpty()) {
+        qWarning() << "File is empty:" << jsonFilePath;
+        return false;
+    }
+    // TODO: support embeded resources.
     const QString resDirPath = QCoreApplication::applicationDirPath();
-    m_animation = skottie()->skottie_animation_from_file_pfn(jsonFilePath.toUtf8().constData(), resDirPath.toUtf8().constData());
+    m_animation = skottie()->skottie_animation_from_data_pfn(const_cast<char *>(jsonBuffer.data()), jsonBuffer.length(), resDirPath.toUtf8().constData());
     if (!m_animation) {
         qWarning() << "Failed to create lottie animation.";
         return false;
@@ -335,7 +347,7 @@ bool QtLottieSkottieEngine::setSource(const QUrl &value)
     m_source = value;
     skottie()->skottie_animation_get_size_pfn(m_animation, reinterpret_cast<size_t *>(&m_width), reinterpret_cast<size_t *>(&m_height));
     m_frameRate = skottie()->skottie_animation_get_framerate_pfn(m_animation);
-    m_duration = 0; // TODO
+    m_duration = skottie()->skottie_animation_get_duration_pfn(m_animation);
     m_totalFrame = skottie()->skottie_animation_get_totalframe_pfn(m_animation);
     // Clear previous status.
     m_currentFrame = 0;
