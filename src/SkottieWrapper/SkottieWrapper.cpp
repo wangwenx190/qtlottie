@@ -39,7 +39,7 @@ Skottie_Animation* skottie_animation_from_file(const char* path, const char* res
     return reinterpret_cast<Skottie_Animation*>(ani);
 }
 
-Skottie_Animation* skottie_animation_fromdata(void *data, size_t data_size, const char *resource)
+Skottie_Animation* skottie_animation_from_data(void *data, size_t data_size, const char *resource)
 {
     Skottie_Animation_Private *ani = new Skottie_Animation_Private{};
     if(!ani)

@@ -49,7 +49,7 @@ Skottie_Animation* skottie_animation_from_file(const char* path, const char* res
  *  @internal
  */
 SKOTTIE_API
-Skottie_Animation* skottie_animation_fromdata(void *data, size_t data_size, const char *resource);
+Skottie_Animation* skottie_animation_from_data(void *data, size_t data_size, const char *resource);
 
 
 /**
