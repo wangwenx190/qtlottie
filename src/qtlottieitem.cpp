@@ -7,11 +7,11 @@ QtLottieItem::QtLottieItem(QQuickItem *parent) : QQuickPaintedItem(parent)
 {
     // We prefer Skottie over RLottie.
     m_drawEngine = QtLottieDrawEngineFactory::create("skottie");
-    if (!m_drawEngine || !m_drawEngine->available()) {
+    if (!available()) {
         qWarning() << "Failed to initialize the skottie backend.";
         dispose();
         m_drawEngine = QtLottieDrawEngineFactory::create("rlottie");
-        if (!m_drawEngine || !m_drawEngine->available()) {
+        if (!available()) {
             qWarning() << "Failed to initialize the rlottie backend.";
             dispose();
             return;
@@ -66,7 +66,7 @@ void QtLottieItem::paint(QPainter *painter)
     if (!painter) {
         return;
     }
-    if (m_drawEngine) {
+    if (available()) {
         m_drawEngine->paint(painter, {qRound(width()), qRound(height())});
     }
 }
@@ -84,21 +84,21 @@ void QtLottieItem::dispose()
 
 void QtLottieItem::pause()
 {
-    if (m_drawEngine) {
+    if (available()) {
         m_drawEngine->pause();
     }
 }
 
 void QtLottieItem::resume()
 {
-    if (m_drawEngine) {
+    if (available()) {
         m_drawEngine->resume();
     }
 }
 
 QString QtLottieItem::backend() const
 {
-    return m_drawEngine ? m_drawEngine->name() : QStringLiteral("Unknown");
+    return available() ? m_drawEngine->name() : QStringLiteral("Unknown");
 }
 
 QUrl QtLottieItem::source() const
@@ -114,7 +114,7 @@ void QtLottieItem::setSource(const QUrl &value)
     }
     if (m_source != value) {
         m_source = value;
-        if (m_drawEngine) {
+        if (available()) {
             if (!m_drawEngine->setSource(value)) {
                 qWarning() << "Failed to start playing.";
             }
@@ -126,29 +126,34 @@ void QtLottieItem::setSource(const QUrl &value)
 int QtLottieItem::frameRate() const
 {
     // TODO: is the fallback value appropriate?
-    return m_drawEngine ? m_drawEngine->frameRate() : 30;
+    return available() ? m_drawEngine->frameRate() : 30;
 }
 
 int QtLottieItem::duration() const
 {
     // TODO: is the fallback value appropriate?
-    return m_drawEngine ? m_drawEngine->duration() : 0;
+    return available() ? m_drawEngine->duration() : 0;
 }
 
 QSize QtLottieItem::sourceSize() const
 {
     // TODO: is the fallback value appropriate?
-    return m_drawEngine ? m_drawEngine->size() : QSize{50, 50};
+    return available() ? m_drawEngine->size() : QSize{50, 50};
 }
 
 int QtLottieItem::loops() const
 {
-    return m_drawEngine ? m_drawEngine->loops() : 0;
+    return available() ? m_drawEngine->loops() : 0;
 }
 
 void QtLottieItem::setLoops(const int value)
 {
-    if (m_drawEngine) {
+    if (available()) {
         m_drawEngine->setLoops(value);
     }
+}
+
+bool QtLottieItem::available() const
+{
+    return (m_drawEngine && m_drawEngine->available());
 }

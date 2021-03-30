@@ -17,6 +17,7 @@ class QTLOTTIE_API QtLottieWidget : public QWidget
     Q_PROPERTY(int duration READ duration NOTIFY durationChanged)
     Q_PROPERTY(QSize sourceSize READ sourceSize NOTIFY sourceSizeChanged)
     Q_PROPERTY(int loops READ loops WRITE setLoops NOTIFY loopsChanged)
+    Q_PROPERTY(bool available READ available CONSTANT)
 
 public:
     explicit QtLottieWidget(QWidget *parent = nullptr);
@@ -37,6 +38,8 @@ public:
 
     int loops() const;
     void setLoops(const int value);
+
+    bool available() const;
 
 public Q_SLOTS:
     void dispose();
