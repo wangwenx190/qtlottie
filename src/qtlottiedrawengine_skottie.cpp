@@ -217,8 +217,11 @@ void QtLottieSkottieEngine::paint(QPainter *painter, const QSize &s)
     Q_ASSERT(skottie()->skottie_animation_render_scale_pfn);
     Q_ASSERT(skottie()->skottie_get_pixmap_buffer_pfn);
     Q_ASSERT(skottie()->skottie_delete_pixmap_pfn);
+    Q_ASSERT(skottie()->skottie_new_pixmap_pfn);
+    Q_ASSERT(skottie()->skottie_animation_render_pfn);
     if (!skottie()->skottie_new_pixmap_wh_pfn || !skottie()->skottie_animation_render_scale_pfn
-        || !skottie()->skottie_get_pixmap_buffer_pfn || !skottie()->skottie_delete_pixmap_pfn) {
+        || !skottie()->skottie_get_pixmap_buffer_pfn || !skottie()->skottie_delete_pixmap_pfn
+        || !skottie()->skottie_new_pixmap_pfn || !skottie()->skottie_animation_render_pfn) {
         qWarning() << Q_FUNC_INFO << "some necessary skottie functions are not available.";
         return;
     }
@@ -231,8 +234,14 @@ void QtLottieSkottieEngine::paint(QPainter *painter, const QSize &s)
     const int width = s.width();
     const int height = s.height();
     QScopedArrayPointer<char> buffer(new char[width * height * 4]);
-    const auto pixmap = skottie()->skottie_new_pixmap_wh_pfn(width, height, buffer.data());
-    skottie()->skottie_animation_render_scale_pfn(m_animation, m_currentFrame, pixmap);
+    Skottie_Pixmap *pixmap = nullptr;
+    if (s == size()) {
+        pixmap = skottie()->skottie_new_pixmap_pfn();
+        skottie()->skottie_animation_render_pfn(m_animation, m_currentFrame, pixmap);
+    } else {
+        pixmap = skottie()->skottie_new_pixmap_wh_pfn(width, height, buffer.data());
+        skottie()->skottie_animation_render_scale_pfn(m_animation, m_currentFrame, pixmap);
+    }
     const void *addr = skottie()->skottie_get_pixmap_buffer_pfn(pixmap);
     QImage image(width, height, QImage::Format_ARGB32);
     for (int i = 0; i != height; ++i) {

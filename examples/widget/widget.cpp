@@ -8,7 +8,9 @@ Widget::Widget(QWidget *parent) : QWidget(parent)
     const auto l = new QVBoxLayout(this);
     l->addWidget(lottieWidget);
     setLayout(l);
-    lottieWidget->setSource(QUrl(QStringLiteral("qrc:///lottie/43721-keywords.json")));
+    connect(lottieWidget, &QtLottieWidget::sourceSizeChanged, this, [this, lottieWidget](){
+        resize(lottieWidget->sourceSize());
+    });
 }
 
 Widget::~Widget() = default;
