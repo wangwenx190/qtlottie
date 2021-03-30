@@ -9,12 +9,12 @@ Window {
     id: window
     width: 800
     height: 600
-    title: qsTr("Hello")
+    title: qsTr("QtLottie Quick Example")
     visible: true
 
     FileDialog {
         id: fileDialog
-        nameFilters: ["Bodymovin files (*.json)", "All files (*)"]
+        nameFilters: [qsTr("Bodymovin files (*.json)"), qsTr("All files (*)")]
         folder: StandardPaths.writableLocation(StandardPaths.DocumentsLocation)
     }
 

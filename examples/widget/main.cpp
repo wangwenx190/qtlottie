@@ -11,7 +11,6 @@ int main(int argc, char *argv[]) {
 #endif
     QApplication application(argc, argv);
     Widget widget;
-    widget.resize(800, 600);
     widget.show();
     return QApplication::exec();
 }
