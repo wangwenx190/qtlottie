@@ -33,6 +33,7 @@ QtLottieWidget::QtLottieWidget(QWidget *parent) : QWidget(parent)
         if (m_drawEngine->playing()) {
             m_timer.start();
         }
+        Q_EMIT frameRateChanged();
     });
     connect(m_drawEngine, &QtLottieDrawEngine::playingChanged, this, [this](){
         if (m_drawEngine->playing()) {
@@ -48,6 +49,9 @@ QtLottieWidget::QtLottieWidget(QWidget *parent) : QWidget(parent)
             }
         }
     });
+    connect(m_drawEngine, &QtLottieDrawEngine::durationChanged, this, &QtLottieWidget::durationChanged);
+    connect(m_drawEngine, &QtLottieDrawEngine::sizeChanged, this, &QtLottieWidget::sourceSizeChanged);
+    connect(m_drawEngine, &QtLottieDrawEngine::loopsChanged, this, &QtLottieWidget::loopsChanged);
 }
 
 QtLottieWidget::~QtLottieWidget()
@@ -66,11 +70,30 @@ void QtLottieWidget::dispose()
     }
 }
 
+void QtLottieWidget::pause()
+{
+    if (m_drawEngine) {
+        m_drawEngine->pause();
+    }
+}
+
+void QtLottieWidget::resume()
+{
+    if (m_drawEngine) {
+        m_drawEngine->resume();
+    }
+}
+
 QSize QtLottieWidget::minimumSizeHint() const
 {
     // Our lottie backend will fail to paint if the size of the widget is too small.
     // This size will be ignored if you set the size policy or minimum size explicitly.
     return {50, 50};
+}
+
+QString QtLottieWidget::backend() const
+{
+    return m_drawEngine ? m_drawEngine->name() : QStringLiteral("Unknown");
 }
 
 QUrl QtLottieWidget::source() const
@@ -92,6 +115,36 @@ void QtLottieWidget::setSource(const QUrl &value)
             }
         }
         Q_EMIT sourceChanged();
+    }
+}
+
+int QtLottieWidget::frameRate() const
+{
+    // TODO: is the fallback value appropriate?
+    return m_drawEngine ? m_drawEngine->frameRate() : 30;
+}
+
+int QtLottieWidget::duration() const
+{
+    // TODO: is the fallback value appropriate?
+    return m_drawEngine ? m_drawEngine->duration() : 0;
+}
+
+QSize QtLottieWidget::sourceSize() const
+{
+    // TODO: is the fallback value appropriate?
+    return m_drawEngine ? m_drawEngine->size() : QSize{50, 50};
+}
+
+int QtLottieWidget::loops() const
+{
+    return m_drawEngine ? m_drawEngine->loops() : 0;
+}
+
+void QtLottieWidget::setLoops(const int value)
+{
+    if (m_drawEngine) {
+        m_drawEngine->setLoops(value);
     }
 }
 

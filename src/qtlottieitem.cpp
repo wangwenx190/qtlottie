@@ -34,6 +34,7 @@ QtLottieItem::QtLottieItem(QQuickItem *parent) : QQuickPaintedItem(parent)
         if (m_drawEngine->playing()) {
             m_timer.start();
         }
+        Q_EMIT frameRateChanged();
     });
     connect(m_drawEngine, &QtLottieDrawEngine::playingChanged, this, [this](){
         if (m_drawEngine->playing()) {
@@ -49,6 +50,9 @@ QtLottieItem::QtLottieItem(QQuickItem *parent) : QQuickPaintedItem(parent)
             }
         }
     });
+    connect(m_drawEngine, &QtLottieDrawEngine::durationChanged, this, &QtLottieItem::durationChanged);
+    connect(m_drawEngine, &QtLottieDrawEngine::sizeChanged, this, &QtLottieItem::sourceSizeChanged);
+    connect(m_drawEngine, &QtLottieDrawEngine::loopsChanged, this, &QtLottieItem::loopsChanged);
 }
 
 QtLottieItem::~QtLottieItem()
@@ -78,6 +82,25 @@ void QtLottieItem::dispose()
     }
 }
 
+void QtLottieItem::pause()
+{
+    if (m_drawEngine) {
+        m_drawEngine->pause();
+    }
+}
+
+void QtLottieItem::resume()
+{
+    if (m_drawEngine) {
+        m_drawEngine->resume();
+    }
+}
+
+QString QtLottieItem::backend() const
+{
+    return m_drawEngine ? m_drawEngine->name() : QStringLiteral("Unknown");
+}
+
 QUrl QtLottieItem::source() const
 {
     return m_source;
@@ -97,5 +120,35 @@ void QtLottieItem::setSource(const QUrl &value)
             }
         }
         Q_EMIT sourceChanged();
+    }
+}
+
+int QtLottieItem::frameRate() const
+{
+    // TODO: is the fallback value appropriate?
+    return m_drawEngine ? m_drawEngine->frameRate() : 30;
+}
+
+int QtLottieItem::duration() const
+{
+    // TODO: is the fallback value appropriate?
+    return m_drawEngine ? m_drawEngine->duration() : 0;
+}
+
+QSize QtLottieItem::sourceSize() const
+{
+    // TODO: is the fallback value appropriate?
+    return m_drawEngine ? m_drawEngine->size() : QSize{50, 50};
+}
+
+int QtLottieItem::loops() const
+{
+    return m_drawEngine ? m_drawEngine->loops() : 0;
+}
+
+void QtLottieItem::setLoops(const int value)
+{
+    if (m_drawEngine) {
+        m_drawEngine->setLoops(value);
     }
 }
