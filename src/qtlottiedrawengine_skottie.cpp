@@ -74,67 +74,67 @@ public:
 
         skottie_animation_from_file_pfn = reinterpret_cast<skottie_animation_from_file_ptr>(skottieLib.resolve("skottie_animation_from_file"));
         if (!skottie_animation_from_file_pfn) {
-            qWarning() << "skottie_animation_from_file_pfn is null:" << skottieLib.errorString();
+            qWarning() << "Failed to resolve skottie_animation_from_file";
         }
 
         skottie_animation_from_data_pfn = reinterpret_cast<skottie_animation_from_data_ptr>(skottieLib.resolve("skottie_animation_from_data"));
         if (!skottie_animation_from_data_pfn) {
-            qWarning() << "skottie_animation_from_data_pfn is null:" << skottieLib.errorString();
+            qWarning() << "Failed to resolve skottie_animation_from_data";
         }
 
         skottie_animation_get_size_pfn = reinterpret_cast<skottie_animation_get_size_ptr>(skottieLib.resolve("skottie_animation_get_size"));
         if (!skottie_animation_get_size_pfn) {
-            qWarning() << "skottie_animation_get_size_pfn is null:" << skottieLib.errorString();
+            qWarning() << "Failed to resolve skottie_animation_get_size";
         }
 
         skottie_animation_get_duration_pfn = reinterpret_cast<skottie_animation_get_duration_ptr>(skottieLib.resolve("skottie_animation_get_duration"));
         if (!skottie_animation_get_duration_pfn) {
-            qWarning() << "skottie_animation_get_duration_pfn is null:" << skottieLib.errorString();
+            qWarning() << "Failed to resolve skottie_animation_get_duration";
         }
 
         skottie_animation_get_totalframe_pfn = reinterpret_cast<skottie_animation_get_totalframe_ptr>(skottieLib.resolve("skottie_animation_get_totalframe"));
         if (!skottie_animation_get_totalframe_pfn) {
-            qWarning() << "skottie_animation_get_totalframe_pfn is null:" << skottieLib.errorString();
+            qWarning() << "Failed to resolve skottie_animation_get_totalframe";
         }
 
         skottie_animation_get_framerate_pfn = reinterpret_cast<skottie_animation_get_framerate_ptr>(skottieLib.resolve("skottie_animation_get_framerate"));
         if (!skottie_animation_get_framerate_pfn) {
-            qWarning() << "skottie_animation_get_framerate_pfn is null:" << skottieLib.errorString();
+            qWarning() << "Failed to resolve skottie_animation_get_framerate";
         }
 
         skottie_new_pixmap_pfn = reinterpret_cast<skottie_new_pixmap_ptr>(skottieLib.resolve("skottie_new_pixmap"));
         if (!skottie_new_pixmap_pfn) {
-            qWarning() << "skottie_new_pixmap_pfn is null:" << skottieLib.errorString();
+            qWarning() << "Failed to resolve skottie_new_pixmap";
         }
 
         skottie_new_pixmap_wh_pfn = reinterpret_cast<skottie_new_pixmap_wh_ptr>(skottieLib.resolve("skottie_new_pixmap_wh"));
         if (!skottie_new_pixmap_wh_pfn) {
-            qWarning() << "skottie_new_pixmap_wh_pfn is null:" << skottieLib.errorString();
+            qWarning() << "Failed to resolve skottie_new_pixmap_wh";
         }
 
         skottie_get_pixmap_buffer_pfn = reinterpret_cast<skottie_get_pixmap_buffer_ptr>(skottieLib.resolve("skottie_get_pixmap_buffer"));
         if (!skottie_get_pixmap_buffer_pfn) {
-            qWarning() << "skottie_get_pixmap_buffer_pfn is null:" << skottieLib.errorString();
+            qWarning() << "Failed to resolve skottie_get_pixmap_buffer";
         }
 
         skottie_delete_pixmap_pfn = reinterpret_cast<skottie_delete_pixmap_ptr>(skottieLib.resolve("skottie_delete_pixmap"));
         if (!skottie_delete_pixmap_pfn) {
-            qWarning() << "skottie_delete_pixmap_pfn is null:" << skottieLib.errorString();
+            qWarning() << "Failed to resolve skottie_delete_pixmap";
         }
 
         skottie_animation_render_pfn = reinterpret_cast<skottie_animation_render_ptr>(skottieLib.resolve("skottie_animation_render"));
         if (!skottie_animation_render_pfn) {
-            qWarning() << "skottie_animation_render_pfn is null:" << skottieLib.errorString();
+            qWarning() << "Failed to resolve skottie_animation_render";
         }
 
         skottie_animation_render_scale_pfn = reinterpret_cast<skottie_animation_render_scale_ptr>(skottieLib.resolve("skottie_animation_render_scale"));
         if (!skottie_animation_render_scale_pfn) {
-            qWarning() << "skottie_animation_render_scale_pfn is null:" << skottieLib.errorString();
+            qWarning() << "Failed to resolve skottie_animation_render_scale";
         }
 
         skottie_animation_destroy_pfn = reinterpret_cast<skottie_animation_destroy_ptr>(skottieLib.resolve("skottie_animation_destroy"));
         if (!skottie_animation_destroy_pfn) {
-            qWarning() << "skottie_animation_destroy_pfn is null:" << skottieLib.errorString();
+            qWarning() << "Failed to resolve skottie_animation_destroy";
         }
 
         return isLoaded();

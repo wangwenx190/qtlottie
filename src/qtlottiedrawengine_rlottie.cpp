@@ -63,37 +63,37 @@ public:
 
         lottie_animation_destroy_pfn = reinterpret_cast<lottie_animation_destroy_ptr>(rlottieLib.resolve("lottie_animation_destroy"));
         if (!lottie_animation_destroy_pfn) {
-            qWarning() << "lottie_animation_destroy_pfn is null:" << rlottieLib.errorString();
+            qWarning() << "Failed to resolve lottie_animation_destroy";
         }
 
         lottie_animation_from_data_pfn = reinterpret_cast<lottie_animation_from_data_ptr>(rlottieLib.resolve("lottie_animation_from_data"));
         if (!lottie_animation_from_data_pfn) {
-            qWarning() << "lottie_animation_from_data_pfn is null:" << rlottieLib.errorString();
+            qWarning() << "Failed to resolve lottie_animation_from_data";
         }
 
         lottie_animation_get_framerate_pfn = reinterpret_cast<lottie_animation_get_framerate_ptr>(rlottieLib.resolve("lottie_animation_get_framerate"));
         if (!lottie_animation_get_framerate_pfn) {
-            qWarning() << "lottie_animation_get_framerate_pfn is null:" << rlottieLib.errorString();
+            qWarning() << "Failed to resolve lottie_animation_get_framerate";
         }
 
         lottie_animation_get_totalframe_pfn = reinterpret_cast<lottie_animation_get_totalframe_ptr>(rlottieLib.resolve("lottie_animation_get_totalframe"));
         if (!lottie_animation_get_totalframe_pfn) {
-            qWarning() << "lottie_animation_get_totalframe_pfn is null:" << rlottieLib.errorString();
+            qWarning() << "Failed to resolve lottie_animation_get_totalframe";
         }
 
         lottie_animation_render_pfn = reinterpret_cast<lottie_animation_render_ptr>(rlottieLib.resolve("lottie_animation_render"));
         if (!lottie_animation_render_pfn) {
-            qWarning() << "lottie_animation_render_pfn is null:" << rlottieLib.errorString();
+            qWarning() << "Failed to resolve lottie_animation_render";
         }
 
         lottie_animation_get_size_pfn = reinterpret_cast<lottie_animation_get_size_ptr>(rlottieLib.resolve("lottie_animation_get_size"));
         if (!lottie_animation_get_size_pfn) {
-            qWarning() << "lottie_animation_get_size_pfn is null:" << rlottieLib.errorString();
+            qWarning() << "Failed to resolve lottie_animation_get_size";
         }
 
         lottie_animation_get_duration_pfn = reinterpret_cast<lottie_animation_get_duration_ptr>(rlottieLib.resolve("lottie_animation_get_duration"));
         if (!lottie_animation_get_duration_pfn) {
-            qWarning() << "lottie_animation_get_duration_pfn is null:" << rlottieLib.errorString();
+            qWarning() << "Failed to resolve lottie_animation_get_duration";
         }
 
         return isLoaded();

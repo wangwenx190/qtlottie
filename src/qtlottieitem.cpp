@@ -5,24 +5,19 @@
 
 QtLottieItem::QtLottieItem(QQuickItem *parent) : QQuickPaintedItem(parent)
 {
+    // We prefer Skottie over RLottie.
     m_drawEngine = QtLottieDrawEngineFactory::create("skottie");
     if (!m_drawEngine || !m_drawEngine->available()) {
-        qWarning() << "Failed to create the skottie backend.";
-        if (m_drawEngine) {
-            m_drawEngine->release();
-            m_drawEngine = nullptr;
-        }
+        qWarning() << "Failed to initialize the skottie backend.";
+        dispose();
         m_drawEngine = QtLottieDrawEngineFactory::create("rlottie");
         if (!m_drawEngine || !m_drawEngine->available()) {
-            qWarning() << "Failed to create the rlottie backend.";
-            if (m_drawEngine) {
-                m_drawEngine->release();
-                m_drawEngine = nullptr;
-            }
+            qWarning() << "Failed to initialize the rlottie backend.";
+            dispose();
             return;
         }
     }
-    m_timer.setTimerType(Qt::PreciseTimer);
+    m_timer.setTimerType(Qt::PreciseTimer); // Is this necesary?
     connect(&m_timer, &QTimer::timeout, this, [this](){
         if (m_drawEngine->playing()) {
             m_drawEngine->render({qRound(width()), qRound(height())});
@@ -58,13 +53,7 @@ QtLottieItem::QtLottieItem(QQuickItem *parent) : QQuickPaintedItem(parent)
 
 QtLottieItem::~QtLottieItem()
 {
-    if (m_timer.isActive()) {
-        m_timer.stop();
-    }
-    if (m_drawEngine) {
-        m_drawEngine->release();
-        m_drawEngine = nullptr;
-    }
+    dispose();
 }
 
 void QtLottieItem::paint(QPainter *painter)
@@ -75,6 +64,17 @@ void QtLottieItem::paint(QPainter *painter)
     }
     if (m_drawEngine) {
         m_drawEngine->paint(painter, {qRound(width()), qRound(height())});
+    }
+}
+
+void QtLottieItem::dispose()
+{
+    if (m_timer.isActive()) {
+        m_timer.stop();
+    }
+    if (m_drawEngine) {
+        m_drawEngine->release();
+        m_drawEngine = nullptr;
     }
 }
 

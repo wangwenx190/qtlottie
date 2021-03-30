@@ -20,6 +20,7 @@ public:
     ~QtLottieItem() override;
 
     void paint(QPainter *painter) override;
+    void dispose();
 
     QUrl source() const;
     void setSource(const QUrl &value);

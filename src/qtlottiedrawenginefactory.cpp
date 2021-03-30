@@ -10,10 +10,10 @@ QtLottieDrawEngine *QtLottieDrawEngineFactory::create(const char *name)
         return nullptr;
     }
     if (_stricmp(name, "skottie") == 0) {
-        qDebug() << "Lottie backend: skottie";
+        qDebug() << "Trying the skottie backend ...";
         return new QtLottieSkottieEngine();
     } else if (_stricmp(name, "rlottie") == 0) {
-        qDebug() << "Lottie backend: rlottie";
+        qDebug() << "Trying the rlottie backend ...";
         return new QtLottieRLottieEngine();
     } else {
         qWarning() << "Unsupported lottie backend:" << name;

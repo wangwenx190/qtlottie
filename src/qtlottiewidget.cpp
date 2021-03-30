@@ -6,24 +6,19 @@
 
 QtLottieWidget::QtLottieWidget(QWidget *parent) : QWidget(parent)
 {
+    // We prefer Skottie over RLottie.
     m_drawEngine = QtLottieDrawEngineFactory::create("skottie");
     if (!m_drawEngine || !m_drawEngine->available()) {
-        qWarning() << "Failed to create the skottie backend.";
-        if (m_drawEngine) {
-            m_drawEngine->release();
-            m_drawEngine = nullptr;
-        }
+        qWarning() << "Failed to initialize the skottie backend.";
+        dispose();
         m_drawEngine = QtLottieDrawEngineFactory::create("rlottie");
         if (!m_drawEngine || !m_drawEngine->available()) {
-            qWarning() << "Failed to create the rlottie backend.";
-            if (m_drawEngine) {
-                m_drawEngine->release();
-                m_drawEngine = nullptr;
-            }
+            qWarning() << "Failed to initialize the rlottie backend.";
+            dispose();
             return;
         }
     }
-    m_timer.setTimerType(Qt::PreciseTimer);
+    m_timer.setTimerType(Qt::PreciseTimer); // Is this necessary?
     connect(&m_timer, &QTimer::timeout, this, [this](){
         if (m_drawEngine->playing()) {
             m_drawEngine->render(size());
@@ -57,6 +52,11 @@ QtLottieWidget::QtLottieWidget(QWidget *parent) : QWidget(parent)
 
 QtLottieWidget::~QtLottieWidget()
 {
+    dispose();
+}
+
+void QtLottieWidget::dispose()
+{
     if (m_timer.isActive()) {
         m_timer.stop();
     }
@@ -68,7 +68,8 @@ QtLottieWidget::~QtLottieWidget()
 
 QSize QtLottieWidget::minimumSizeHint() const
 {
-    // The draw engine will fail to paint if the size of the widget is too small.
+    // Our lottie backend will fail to paint if the size of the widget is too small.
+    // This size will be ignored if you set the size policy or minimum size explicitly.
     return {50, 50};
 }
 
@@ -96,9 +97,9 @@ void QtLottieWidget::setSource(const QUrl &value)
 
 void QtLottieWidget::paintEvent(QPaintEvent *event)
 {
+    QWidget::paintEvent(event);
     QPainter painter(this);
     if (m_drawEngine) {
         m_drawEngine->paint(&painter, size());
     }
-    QWidget::paintEvent(event);
 }
