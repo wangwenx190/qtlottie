@@ -8,7 +8,6 @@ find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets REQUIRED)
 
 set(SOURCES
-    ../lottie.qrc
     main.cpp
     widget.h
     widget.cpp

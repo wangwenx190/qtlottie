@@ -41,7 +41,9 @@ QtLottieItem::QtLottieItem(QQuickItem *parent) : QQuickPaintedItem(parent)
             return;
         }
     }
-    m_timer.setTimerType(Qt::PreciseTimer); // Is this necesary?
+    // Use "Qt::PreciseTimer" to get the best appearance, however, it
+    // will have a performance impact.
+    m_timer.setTimerType(Qt::CoarseTimer);
     connect(&m_timer, &QTimer::timeout, this, [this](){
         if (m_drawEngine->playing()) {
             m_drawEngine->render({qRound(width()), qRound(height())});
