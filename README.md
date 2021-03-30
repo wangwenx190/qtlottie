@@ -4,7 +4,7 @@ QtLottie is a tiny C++ library that can render [Adobe® After Effects™](http:/
 
 ## Features
 
-- Supported many After Effects features. [Click here to see a complete list](https://github.com/Samsung/rlottie#supported-after-effects-features).
+- Support many After Effects features (depends on the specific backend).
 - Cross-platform: support Windows (7~10), Linux and macOS.
 - Support both Qt Widgets and Qt Quick.
 - Support all versions from Qt5 to Qt6.
@@ -18,7 +18,7 @@ cmake --build .
 cmake --install .
 ```
 
-[rlottie](https://github.com/Samsung/rlottie) is the only third-party dependency. QtLottie will load it dynamically at run-time. Make sure you have build it and put it in the executable's directory before you run your application.
+Currently QtLottie supports two backends: [skottie](https://skia.org/user/modules/skottie) and [rlottie](https://github.com/Samsung/rlottie). QtLottie will load it dynamically at run-time. Make sure you have build it and put it in the executable's directory before you run your application. While this library is initializing, skottie is prefered over rlottie.
 
 ## Usage
 
