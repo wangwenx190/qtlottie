@@ -263,12 +263,18 @@ bool QtLottieRLottieEngine::playing() const
 
 void QtLottieRLottieEngine::pause()
 {
-
+    if (m_animation && !m_shouldStop) {
+        m_shouldStop = true;
+        Q_EMIT playingChanged();
+    }
 }
 
 void QtLottieRLottieEngine::resume()
 {
-
+    if (m_animation && m_shouldStop) {
+        m_shouldStop = false;
+        Q_EMIT playingChanged();
+    }
 }
 
 void QtLottieRLottieEngine::paint(QPainter *painter, const QSize &s)

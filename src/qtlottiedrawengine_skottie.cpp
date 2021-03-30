@@ -407,10 +407,16 @@ bool QtLottieSkottieEngine::playing() const
 
 void QtLottieSkottieEngine::pause()
 {
-
+    if (m_animation && !m_shouldStop) {
+        m_shouldStop = true;
+        Q_EMIT playingChanged();
+    }
 }
 
 void QtLottieSkottieEngine::resume()
 {
-
+    if (m_animation && m_shouldStop) {
+        m_shouldStop = false;
+        Q_EMIT playingChanged();
+    }
 }
