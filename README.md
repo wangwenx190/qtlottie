@@ -18,7 +18,7 @@ cmake --build .
 cmake --install .
 ```
 
-Currently QtLottie supports two backends: [skottie](https://skia.org/user/modules/skottie) and [rlottie](https://github.com/Samsung/rlottie). QtLottie will load it dynamically at run-time. Make sure you have build it and put it in the executable's directory before you run your application. While this library is initializing, skottie is prefered over rlottie.
+Currently QtLottie supports two backends: [skottie](https://github.com/xspeed1989/SkottieWrapper) and [rlottie](https://github.com/Samsung/rlottie). QtLottie will load it dynamically at run-time. Make sure you have build it and put it in the executable's directory before you run your application. While this library is initializing, skottie is prefered over rlottie.
 
 ## Usage
 
