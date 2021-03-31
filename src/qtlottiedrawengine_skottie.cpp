@@ -273,10 +273,7 @@ void QtLottieSkottieEngine::paint(QPainter *painter, const QSize &s)
         memcpy(image.scanLine(i), p, image.bytesPerLine());
     }
     skottie()->skottie_delete_pixmap_pfn(pixmap);
-    painter->save();
-    painter->setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing | QPainter::SmoothPixmapTransform);
     painter->drawImage(QPoint{0, 0}, image);
-    painter->restore();
 }
 
 void QtLottieSkottieEngine::render(const QSize &s)

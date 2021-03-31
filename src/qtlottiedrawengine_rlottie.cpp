@@ -328,12 +328,9 @@ void QtLottieRLottieEngine::paint(QPainter *painter, const QSize &s)
         char *p = m_frameBuffer.data() + i * image.bytesPerLine();
         memcpy(image.scanLine(i), p, image.bytesPerLine());
     }
-    painter->save();
-    painter->setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing | QPainter::SmoothPixmapTransform);
     // TODO: let the user be able to set the scale mode.
     // "Qt::SmoothTransformation" is a must otherwise the scaled image will become fuzzy.
     painter->drawImage(QPoint{0, 0}, (s == size()) ? image : image.scaled(s, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
-    painter->restore();
 }
 
 void QtLottieRLottieEngine::render(const QSize &s)
