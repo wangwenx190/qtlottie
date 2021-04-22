@@ -46,7 +46,7 @@ QtLottieItem::QtLottieItem(QQuickItem *parent) : QQuickPaintedItem(parent)
     m_timer.setTimerType(Qt::CoarseTimer);
     connect(&m_timer, &QTimer::timeout, this, [this](){
         if (m_drawEngine->playing()) {
-            m_drawEngine->render({qRound(width()), qRound(height())});
+            m_drawEngine->render(size().toSize());
         }
     });
     connect(m_drawEngine, &QtLottieDrawEngine::needsRepaint, this, [this](){
@@ -93,7 +93,7 @@ void QtLottieItem::paint(QPainter *painter)
         return;
     }
     if (available()) {
-        m_drawEngine->paint(painter, {qRound(width()), qRound(height())});
+        m_drawEngine->paint(painter, size().toSize());
     }
 }
 
