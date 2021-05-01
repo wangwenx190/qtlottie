@@ -33,10 +33,10 @@ QtLottieDrawEngine *QtLottieDrawEngineFactory::create(const char *name)
     if (!name) {
         return nullptr;
     }
-    if (_stricmp(name, "skottie") == 0) {
+    if (qstricmp(name, "skottie") == 0) {
         qDebug() << "Trying the skottie backend ...";
         return new QtLottieSkottieEngine();
-    } else if (_stricmp(name, "rlottie") == 0) {
+    } else if (qstricmp(name, "rlottie") == 0) {
         qDebug() << "Trying the rlottie backend ...";
         return new QtLottieRLottieEngine();
     } else {
