@@ -221,7 +221,7 @@ QtLottieSkottieEngine::~QtLottieSkottieEngine()
     }
 }
 
-void QtLottieSkottieEngine::paint(QPainter *painter, const QSize &s)
+void QtLottieSkottieEngine::paint(QPainter *painter, const QSizeF &s)
 {
     Q_ASSERT(painter);
     if (!painter) {
@@ -273,10 +273,10 @@ void QtLottieSkottieEngine::paint(QPainter *painter, const QSize &s)
         memcpy(image.scanLine(i), p, image.bytesPerLine());
     }
     skottie()->skottie_delete_pixmap_pfn(pixmap);
-    painter->drawImage(QPoint{0, 0}, image);
+    painter->drawImage(QPointF{0, 0}, image);
 }
 
-void QtLottieSkottieEngine::render(const QSize &s)
+void QtLottieSkottieEngine::render(const QSizeF &s)
 {
     Q_UNUSED(s);
     if (!m_animation) {
@@ -295,7 +295,7 @@ void QtLottieSkottieEngine::render(const QSize &s)
             if (m_loopTimes >= m_loops) {
                 m_loopTimes = 0;
                 m_shouldStop = true;
-                Q_EMIT playingChanged();
+                Q_EMIT playingChanged(false);
                 return;
             }
         }
@@ -385,27 +385,27 @@ bool QtLottieSkottieEngine::setSource(const QUrl &value)
     m_currentFrame = 0;
     m_loopTimes = 0;
     m_shouldStop = false;
-    Q_EMIT sourceChanged();
-    Q_EMIT sizeChanged();
-    Q_EMIT frameRateChanged();
-    Q_EMIT durationChanged();
-    Q_EMIT playingChanged();
+    Q_EMIT sourceChanged(m_source);
+    Q_EMIT sizeChanged(size());
+    Q_EMIT frameRateChanged(m_frameRate);
+    Q_EMIT durationChanged(m_duration);
+    Q_EMIT playingChanged(true);
     return true;
 }
 
-int QtLottieSkottieEngine::frameRate() const
+qreal QtLottieSkottieEngine::frameRate() const
 {
-    return qRound(m_frameRate);
+    return m_frameRate;
 }
 
-int QtLottieSkottieEngine::duration() const
+qreal QtLottieSkottieEngine::duration() const
 {
-    return qRound(m_duration);
+    return m_duration;
 }
 
-QSize QtLottieSkottieEngine::size() const
+QSizeF QtLottieSkottieEngine::size() const
 {
-    return {static_cast<int>(m_width), static_cast<int>(m_height)};
+    return {static_cast<qreal>(m_width), static_cast<qreal>(m_height)};
 }
 
 int QtLottieSkottieEngine::loops() const
@@ -417,11 +417,11 @@ void QtLottieSkottieEngine::setLoops(const int value)
 {
     if (m_loops != value) {
         m_loops = value;
-        Q_EMIT loopsChanged();
+        Q_EMIT loopsChanged(m_loops);
         // Also clear previous status.
         m_loopTimes = 0;
         m_shouldStop = false;
-        Q_EMIT playingChanged();
+        Q_EMIT playingChanged(true);
     }
 }
 
@@ -439,7 +439,7 @@ void QtLottieSkottieEngine::pause()
 {
     if (m_animation && !m_shouldStop) {
         m_shouldStop = true;
-        Q_EMIT playingChanged();
+        Q_EMIT playingChanged(false);
     }
 }
 
@@ -447,6 +447,6 @@ void QtLottieSkottieEngine::resume()
 {
     if (m_animation && m_shouldStop) {
         m_shouldStop = false;
-        Q_EMIT playingChanged();
+        Q_EMIT playingChanged(true);
     }
 }

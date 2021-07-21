@@ -34,14 +34,14 @@ class QTLOTTIE_API QtLottieItem : public QQuickPaintedItem
 {
     Q_OBJECT
     Q_DISABLE_COPY_MOVE(QtLottieItem)
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
-    QML_ELEMENT
+#ifdef QML_NAMED_ELEMENT
+    QML_NAMED_ELEMENT(LottieItem)
 #endif
     Q_PROPERTY(QString backend READ backend CONSTANT)
     Q_PROPERTY(QUrl source READ source WRITE setSource NOTIFY sourceChanged)
-    Q_PROPERTY(int frameRate READ frameRate NOTIFY frameRateChanged)
-    Q_PROPERTY(int duration READ duration NOTIFY durationChanged)
-    Q_PROPERTY(QSize sourceSize READ sourceSize NOTIFY sourceSizeChanged)
+    Q_PROPERTY(qreal frameRate READ frameRate NOTIFY frameRateChanged)
+    Q_PROPERTY(qreal duration READ duration NOTIFY durationChanged)
+    Q_PROPERTY(QSizeF sourceSize READ sourceSize NOTIFY sourceSizeChanged)
     Q_PROPERTY(int loops READ loops WRITE setLoops NOTIFY loopsChanged)
     Q_PROPERTY(bool available READ available CONSTANT)
 
@@ -56,11 +56,11 @@ public:
     QUrl source() const;
     void setSource(const QUrl &value);
 
-    int frameRate() const;
+    qreal frameRate() const;
 
-    int duration() const;
+    qreal duration() const;
 
-    QSize sourceSize() const;
+    QSizeF sourceSize() const;
 
     int loops() const;
     void setLoops(const int value);
@@ -73,11 +73,11 @@ public Q_SLOTS:
     void resume();
 
 Q_SIGNALS:
-    void sourceChanged();
-    void frameRateChanged();
-    void durationChanged();
-    void sourceSizeChanged();
-    void loopsChanged();
+    void sourceChanged(const QUrl &);
+    void frameRateChanged(qreal);
+    void durationChanged(qreal);
+    void sourceSizeChanged(const QSizeF &);
+    void loopsChanged(int);
 
 private:
     QUrl m_source = {};

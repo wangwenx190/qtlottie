@@ -42,14 +42,9 @@
 #define Q_OS_WINDOWS
 #endif
 
-#ifndef Q_DISABLE_MOVE
-#define Q_DISABLE_MOVE(Class) \
-    Class(Class &&) = delete; \
-    Class &operator=(Class &&) = delete;
-#endif
-
 #ifndef Q_DISABLE_COPY_MOVE
 #define Q_DISABLE_COPY_MOVE(Class) \
     Q_DISABLE_COPY(Class) \
-    Q_DISABLE_MOVE(Class)
+    Class(Class &&) = delete; \
+    Class &operator=(Class &&) = delete;
 #endif

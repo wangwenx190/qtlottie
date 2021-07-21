@@ -46,7 +46,7 @@ QtLottieItem::QtLottieItem(QQuickItem *parent) : QQuickPaintedItem(parent)
     m_timer.setTimerType(Qt::CoarseTimer);
     connect(&m_timer, &QTimer::timeout, this, [this](){
         if (m_drawEngine->playing()) {
-            m_drawEngine->render(size().toSize());
+            m_drawEngine->render(size());
         }
     });
     connect(m_drawEngine, &QtLottieDrawEngine::needsRepaint, this, [this](){
@@ -60,7 +60,7 @@ QtLottieItem::QtLottieItem(QQuickItem *parent) : QQuickPaintedItem(parent)
         if (m_drawEngine->playing()) {
             m_timer.start();
         }
-        Q_EMIT frameRateChanged();
+        Q_EMIT frameRateChanged(m_drawEngine->frameRate());
     });
     connect(m_drawEngine, &QtLottieDrawEngine::playingChanged, this, [this](){
         if (m_drawEngine->playing()) {
@@ -93,7 +93,7 @@ void QtLottieItem::paint(QPainter *painter)
         return;
     }
     if (available()) {
-        m_drawEngine->paint(painter, size().toSize());
+        m_drawEngine->paint(painter, size());
     }
 }
 
@@ -145,26 +145,26 @@ void QtLottieItem::setSource(const QUrl &value)
                 qWarning() << "Failed to start playing.";
             }
         }
-        Q_EMIT sourceChanged();
+        Q_EMIT sourceChanged(m_source);
     }
 }
 
-int QtLottieItem::frameRate() const
+qreal QtLottieItem::frameRate() const
 {
     // TODO: is the fallback value appropriate?
-    return available() ? m_drawEngine->frameRate() : 30;
+    return available() ? m_drawEngine->frameRate() : 30.0;
 }
 
-int QtLottieItem::duration() const
+qreal QtLottieItem::duration() const
 {
     // TODO: is the fallback value appropriate?
-    return available() ? m_drawEngine->duration() : 0;
+    return available() ? m_drawEngine->duration() : 0.0;
 }
 
-QSize QtLottieItem::sourceSize() const
+QSizeF QtLottieItem::sourceSize() const
 {
     // TODO: is the fallback value appropriate?
-    return available() ? m_drawEngine->size() : QSize{50, 50};
+    return available() ? m_drawEngine->size() : QSizeF{50.0, 50.0};
 }
 
 int QtLottieItem::loops() const

@@ -59,7 +59,7 @@ QtLottieWidget::QtLottieWidget(QWidget *parent) : QWidget(parent)
         if (m_drawEngine->playing()) {
             m_timer.start();
         }
-        Q_EMIT frameRateChanged();
+        Q_EMIT frameRateChanged(qRound(m_drawEngine->frameRate()));
     });
     connect(m_drawEngine, &QtLottieDrawEngine::playingChanged, this, [this](){
         if (m_drawEngine->playing()) {
@@ -140,26 +140,26 @@ void QtLottieWidget::setSource(const QUrl &value)
                 qWarning() << "Failed to start playing.";
             }
         }
-        Q_EMIT sourceChanged();
+        Q_EMIT sourceChanged(m_source);
     }
 }
 
 int QtLottieWidget::frameRate() const
 {
     // TODO: is the fallback value appropriate?
-    return available() ? m_drawEngine->frameRate() : 30;
+    return available() ? qRound(m_drawEngine->frameRate()) : 30;
 }
 
 int QtLottieWidget::duration() const
 {
     // TODO: is the fallback value appropriate?
-    return available() ? m_drawEngine->duration() : 0;
+    return available() ? qRound(m_drawEngine->duration()) : 0;
 }
 
 QSize QtLottieWidget::sourceSize() const
 {
     // TODO: is the fallback value appropriate?
-    return available() ? m_drawEngine->size() : QSize{50, 50};
+    return available() ? m_drawEngine->size().toSize() : QSize{50, 50};
 }
 
 int QtLottieWidget::loops() const

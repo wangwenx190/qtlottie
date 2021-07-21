@@ -71,11 +71,11 @@ public Q_SLOTS:
     void resume();
 
 Q_SIGNALS:
-    void sourceChanged();
-    void frameRateChanged();
-    void durationChanged();
-    void sourceSizeChanged();
-    void loopsChanged();
+    void sourceChanged(const QUrl &);
+    void frameRateChanged(int);
+    void durationChanged(int);
+    void sourceSizeChanged(const QSize &);
+    void loopsChanged(int);
 
 protected:
     void paintEvent(QPaintEvent *event) override;

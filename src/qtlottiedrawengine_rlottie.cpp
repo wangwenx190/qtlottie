@@ -235,27 +235,27 @@ bool QtLottieRLottieEngine::setSource(const QUrl &value)
     m_currentFrame = 0;
     m_loopTimes = 0;
     m_shouldStop = false;
-    Q_EMIT sourceChanged();
-    Q_EMIT sizeChanged();
-    Q_EMIT frameRateChanged();
-    Q_EMIT durationChanged();
-    Q_EMIT playingChanged();
+    Q_EMIT sourceChanged(m_source);
+    Q_EMIT sizeChanged(size());
+    Q_EMIT frameRateChanged(m_frameRate);
+    Q_EMIT durationChanged(m_duration);
+    Q_EMIT playingChanged(true);
     return true;
 }
 
-int QtLottieRLottieEngine::frameRate() const
+qreal QtLottieRLottieEngine::frameRate() const
 {
-    return qRound(m_frameRate);
+    return m_frameRate;
 }
 
-int QtLottieRLottieEngine::duration() const
+qreal QtLottieRLottieEngine::duration() const
 {
-    return qRound(m_duration);
+    return m_duration;
 }
 
-QSize QtLottieRLottieEngine::size() const
+QSizeF QtLottieRLottieEngine::size() const
 {
-    return {static_cast<int>(m_width), static_cast<int>(m_height)};
+    return {static_cast<qreal>(m_width), static_cast<qreal>(m_height)};
 }
 
 int QtLottieRLottieEngine::loops() const
@@ -267,11 +267,11 @@ void QtLottieRLottieEngine::setLoops(const int value)
 {
     if (m_loops != value) {
         m_loops = value;
-        Q_EMIT loopsChanged();
+        Q_EMIT loopsChanged(m_loops);
         // Also clear previous status.
         m_loopTimes = 0;
         m_shouldStop = false;
-        Q_EMIT playingChanged();
+        Q_EMIT playingChanged(true);
     }
 }
 
@@ -289,7 +289,7 @@ void QtLottieRLottieEngine::pause()
 {
     if (m_animation && !m_shouldStop) {
         m_shouldStop = true;
-        Q_EMIT playingChanged();
+        Q_EMIT playingChanged(false);
     }
 }
 
@@ -297,11 +297,11 @@ void QtLottieRLottieEngine::resume()
 {
     if (m_animation && m_shouldStop) {
         m_shouldStop = false;
-        Q_EMIT playingChanged();
+        Q_EMIT playingChanged(true);
     }
 }
 
-void QtLottieRLottieEngine::paint(QPainter *painter, const QSize &s)
+void QtLottieRLottieEngine::paint(QPainter *painter, const QSizeF &s)
 {
     Q_ASSERT(painter);
     if (!painter) {
@@ -330,10 +330,10 @@ void QtLottieRLottieEngine::paint(QPainter *painter, const QSize &s)
     }
     // TODO: let the user be able to set the scale mode.
     // "Qt::SmoothTransformation" is a must otherwise the scaled image will become fuzzy.
-    painter->drawImage(QPoint{0, 0}, (s == size()) ? image : image.scaled(s, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+    painter->drawImage(QPointF{0, 0}, (s == size()) ? image : image.scaled(s.toSize(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 }
 
-void QtLottieRLottieEngine::render(const QSize &s)
+void QtLottieRLottieEngine::render(const QSizeF &s)
 {
     Q_UNUSED(s);
     if (!m_animation) {
@@ -358,7 +358,7 @@ void QtLottieRLottieEngine::render(const QSize &s)
             if (m_loopTimes >= m_loops) {
                 m_loopTimes = 0;
                 m_shouldStop = true;
-                Q_EMIT playingChanged();
+                Q_EMIT playingChanged(false);
                 return;
             }
         }

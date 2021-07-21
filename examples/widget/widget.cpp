@@ -24,7 +24,7 @@
 
 #include "widget.h"
 #include <qtlottiewidget.h>
-#include <QtWidgets/qlayout.h>
+#include <QtWidgets/qboxlayout.h>
 #include <QtWidgets/qlabel.h>
 #include <QtWidgets/qlineedit.h>
 #include <QtWidgets/qpushbutton.h>

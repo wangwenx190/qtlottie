@@ -37,8 +37,8 @@ public:
     explicit QtLottieRLottieEngine(QObject *parent = nullptr);
     ~QtLottieRLottieEngine() override;
 
-    void paint(QPainter *painter, const QSize &s) override;
-    void render(const QSize &s) override;
+    void paint(QPainter *painter, const QSizeF &s) override;
+    void render(const QSizeF &s) override;
     void release() override;
 
     QString name() const override;
@@ -46,11 +46,11 @@ public:
     QUrl source() const override;
     bool setSource(const QUrl &value) override;
 
-    int frameRate() const override;
+    qreal frameRate() const override;
 
-    int duration() const override;
+    qreal duration() const override;
 
-    QSize size() const override;
+    QSizeF size() const override;
 
     int loops() const override;
     void setLoops(const int value) override;
