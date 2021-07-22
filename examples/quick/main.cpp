@@ -25,7 +25,6 @@
 #include <QtGui/qguiapplication.h>
 #include <QtQml/qqmlapplicationengine.h>
 #include <QtQuickControls2/qquickstyle.h>
-#include <QtQuick/qquickwindow.h>
 #include <qtlottieitem.h>
 
 int main(int argc, char *argv[]) {
@@ -42,14 +41,12 @@ int main(int argc, char *argv[]) {
     QQmlApplicationEngine engine;
 
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
-    QQuickWindow::setGraphicsApi(QSGRendererInterface::Software);
     QQuickStyle::setStyle(QStringLiteral("Basic"));
 #else
-    QQuickWindow::setSceneGraphBackend(QSGRendererInterface::Software);
     QQuickStyle::setStyle(QStringLiteral("Default"));
 #endif
 
-    qmlRegisterType<QtLottieItem>("wangwenx190.Utils", 1, 0, "QtLottieItem");
+    qmlRegisterType<QtLottieItem>("wangwenx190.Utils", 1, 0, "LottieItem");
 
     const QUrl mainQmlUrl(QStringLiteral("qrc:///qml/main.qml"));
     const QMetaObject::Connection connection = QObject::connect(

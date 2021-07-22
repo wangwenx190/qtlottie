@@ -46,27 +46,32 @@ QtLottieItem::QtLottieItem(QQuickItem *parent) : QQuickPaintedItem(parent)
     m_timer.setTimerType(Qt::CoarseTimer);
     connect(&m_timer, &QTimer::timeout, this, [this](){
         if (m_drawEngine->playing()) {
-            m_drawEngine->render(size());
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
+            const QSizeF s = size();
+#else
+            const QSizeF s = {width(), height()};
+#endif
+            m_drawEngine->render(s);
         }
     });
     connect(m_drawEngine, &QtLottieDrawEngine::needsRepaint, this, [this](){
         update();
     });
-    connect(m_drawEngine, &QtLottieDrawEngine::frameRateChanged, this, [this](){
+    connect(m_drawEngine, &QtLottieDrawEngine::frameRateChanged, this, [this](qreal arg){
         if (m_timer.isActive()) {
             m_timer.stop();
         }
-        m_timer.setInterval(1000 / m_drawEngine->frameRate());
+        m_timer.setInterval(qRound(1000.0 / arg));
         if (m_drawEngine->playing()) {
             m_timer.start();
         }
-        Q_EMIT frameRateChanged(m_drawEngine->frameRate());
+        Q_EMIT frameRateChanged(arg);
     });
-    connect(m_drawEngine, &QtLottieDrawEngine::playingChanged, this, [this](){
-        if (m_drawEngine->playing()) {
+    connect(m_drawEngine, &QtLottieDrawEngine::playingChanged, this, [this](bool arg){
+        if (arg) {
             if (!m_timer.isActive()) {
                 if (m_timer.interval() <= 0) {
-                    m_timer.setInterval(1000 / m_drawEngine->frameRate());
+                    m_timer.setInterval(qRound(1000.0 / m_drawEngine->frameRate()));
                 }
                 m_timer.start();
             }
@@ -93,7 +98,12 @@ void QtLottieItem::paint(QPainter *painter)
         return;
     }
     if (available()) {
-        m_drawEngine->paint(painter, size());
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
+        const QSizeF s = size();
+#else
+        const QSizeF s = {width(), height()};
+#endif
+        m_drawEngine->paint(painter, s);
     }
 }
 

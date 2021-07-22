@@ -33,7 +33,12 @@ static const char _env_var_skottie_name[] = "QTLOTTIE_SKOTTIE_NAME";
 
 static inline QString getSkottieLibraryName()
 {
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
     return qEnvironmentVariable(_env_var_skottie_name, QStringLiteral("skottiewrapper"));
+#else
+    const QByteArray ba = qgetenv(_env_var_skottie_name);
+    return ba.isEmpty() ? QStringLiteral("skottiewrapper") : QString::fromUtf8(ba);
+#endif
 }
 
 using skottie_animation_from_file_ptr = Skottie_Animation*(*)(const char *path, const char *resource);

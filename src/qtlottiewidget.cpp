@@ -51,21 +51,21 @@ QtLottieWidget::QtLottieWidget(QWidget *parent) : QWidget(parent)
         }
     });
     connect(m_drawEngine, &QtLottieDrawEngine::needsRepaint, this, qOverload<>(&QtLottieWidget::update));
-    connect(m_drawEngine, &QtLottieDrawEngine::frameRateChanged, this, [this](){
+    connect(m_drawEngine, &QtLottieDrawEngine::frameRateChanged, this, [this](qreal arg){
         if (m_timer.isActive()) {
             m_timer.stop();
         }
-        m_timer.setInterval(1000 / m_drawEngine->frameRate());
+        m_timer.setInterval(qRound(1000.0 / arg));
         if (m_drawEngine->playing()) {
             m_timer.start();
         }
-        Q_EMIT frameRateChanged(qRound(m_drawEngine->frameRate()));
+        Q_EMIT frameRateChanged(qRound(arg));
     });
-    connect(m_drawEngine, &QtLottieDrawEngine::playingChanged, this, [this](){
-        if (m_drawEngine->playing()) {
+    connect(m_drawEngine, &QtLottieDrawEngine::playingChanged, this, [this](bool arg){
+        if (arg) {
             if (!m_timer.isActive()) {
                 if (m_timer.interval() <= 0) {
-                    m_timer.setInterval(1000 / m_drawEngine->frameRate());
+                    m_timer.setInterval(qRound(1000.0 / m_drawEngine->frameRate()));
                 }
                 m_timer.start();
             }
@@ -75,8 +75,12 @@ QtLottieWidget::QtLottieWidget(QWidget *parent) : QWidget(parent)
             }
         }
     });
-    connect(m_drawEngine, &QtLottieDrawEngine::durationChanged, this, &QtLottieWidget::durationChanged);
-    connect(m_drawEngine, &QtLottieDrawEngine::sizeChanged, this, &QtLottieWidget::sourceSizeChanged);
+    connect(m_drawEngine, &QtLottieDrawEngine::durationChanged, this, [this](qreal arg){
+        Q_EMIT durationChanged(qRound(arg));
+    });
+    connect(m_drawEngine, &QtLottieDrawEngine::sizeChanged, this, [this](const QSizeF &arg){
+        Q_EMIT sourceSizeChanged(arg.toSize());
+    });
     connect(m_drawEngine, &QtLottieDrawEngine::loopsChanged, this, &QtLottieWidget::loopsChanged);
 }
 

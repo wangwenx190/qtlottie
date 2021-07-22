@@ -34,7 +34,12 @@ static const char _env_var_rlottie_name[] = "QTLOTTIE_RLOTTIE_NAME";
 
 static inline QString getRLottieLibraryName()
 {
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
     return qEnvironmentVariable(_env_var_rlottie_name, QStringLiteral("rlottie"));
+#else
+    const QByteArray ba = qgetenv(_env_var_rlottie_name);
+    return ba.isEmpty() ? QStringLiteral("rlottie") : QString::fromUtf8(ba);
+#endif
 }
 
 using lottie_animation_destroy_ptr = void(*)(Lottie_Animation *animation);

@@ -42,7 +42,7 @@ Window {
         folder: StandardPaths.writableLocation(StandardPaths.DocumentsLocation)
     }
 
-    QtLottieItem {
+    LottieItem {
         id: lottieItem
         anchors.fill: parent
         source: fileDialog.file
