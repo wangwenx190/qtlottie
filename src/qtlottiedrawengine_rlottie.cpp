@@ -42,6 +42,8 @@ static inline QString getRLottieLibraryName()
 #endif
 }
 
+using lottie_init_ptr = void(*)();
+using lottie_shutdown_ptr = void(*)();
 using lottie_animation_destroy_ptr = void(*)(Lottie_Animation *animation);
 using lottie_animation_from_data_ptr = Lottie_Animation *(*)(const char *data, const char *key, const char *resource_path);
 using lottie_animation_get_framerate_ptr = double(*)(const Lottie_Animation *animation);
@@ -55,6 +57,8 @@ class rlottie_data
     Q_DISABLE_COPY_MOVE(rlottie_data)
 
 public:
+    lottie_init_ptr lottie_init_pfn = nullptr;
+    lottie_shutdown_ptr lottie_shutdown_pfn = nullptr;
     lottie_animation_destroy_ptr lottie_animation_destroy_pfn = nullptr;
     lottie_animation_from_data_ptr lottie_animation_from_data_pfn = nullptr;
     lottie_animation_get_framerate_ptr lottie_animation_get_framerate_pfn = nullptr;
@@ -89,6 +93,16 @@ public:
             return false;
         }
         qDebug() << "rlottie library loaded successfully from" << rlottieLib.fileName();
+
+        lottie_init_pfn = reinterpret_cast<lottie_init_ptr>(rlottieLib.resolve("lottie_init"));
+        if (!lottie_init_pfn) {
+            qWarning() << "Failed to resolve lottie_init";
+        }
+
+        lottie_shutdown_pfn = reinterpret_cast<lottie_shutdown_ptr>(rlottieLib.resolve("lottie_shutdown"));
+        if (!lottie_shutdown_pfn) {
+            qWarning() << "Failed to resolve lottie_shutdown";
+        }
 
         lottie_animation_destroy_pfn = reinterpret_cast<lottie_animation_destroy_ptr>(rlottieLib.resolve("lottie_animation_destroy"));
         if (!lottie_animation_destroy_pfn) {
@@ -130,6 +144,8 @@ public:
 
     [[nodiscard]] bool unload()
     {
+        lottie_init_pfn = nullptr;
+        lottie_shutdown_pfn = nullptr;
         lottie_animation_destroy_pfn = nullptr;
         lottie_animation_from_data_pfn = nullptr;
         lottie_animation_get_framerate_pfn = nullptr;
@@ -150,7 +166,8 @@ public:
 
     [[nodiscard]] bool isLoaded() const
     {
-        return rlottieLib.isLoaded() && lottie_animation_destroy_pfn
+        return rlottieLib.isLoaded() && lottie_init_pfn
+                && lottie_shutdown_pfn && lottie_animation_destroy_pfn
                 && lottie_animation_from_data_pfn && lottie_animation_get_framerate_pfn
                 && lottie_animation_get_totalframe_pfn && lottie_animation_render_pfn
                 && lottie_animation_get_size_pfn && lottie_animation_get_duration_pfn;
@@ -164,7 +181,9 @@ Q_GLOBAL_STATIC(rlottie_data, rlottie)
 
 QtLottieRLottieEngine::QtLottieRLottieEngine(QObject *parent) : QtLottieDrawEngine(parent)
 {
-    if (!rlottie()->isLoaded()) {
+    if (rlottie()->isLoaded()) {
+        rlottie()->lottie_init_pfn();
+    } else {
         qWarning() << "rlottie library not loaded.";
     }
 }
@@ -173,6 +192,9 @@ QtLottieRLottieEngine::~QtLottieRLottieEngine()
 {
     if (m_animation && rlottie()->lottie_animation_destroy_pfn) {
         rlottie()->lottie_animation_destroy_pfn(m_animation);
+    }
+    if (rlottie()->lottie_shutdown_pfn) {
+        rlottie()->lottie_shutdown_pfn();
     }
 }
 
