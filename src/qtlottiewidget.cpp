@@ -30,17 +30,11 @@
 
 QtLottieWidget::QtLottieWidget(QWidget *parent) : QWidget(parent)
 {
-    // We prefer Skottie over RLottie.
-    m_drawEngine = QtLottieDrawEngineFactory::create("skottie");
+    m_drawEngine = QtLottieDrawEngineFactory::create();
     if (!available()) {
-        qWarning() << "Failed to initialize the skottie backend.";
+        qWarning() << "No backends available.";
         dispose();
-        m_drawEngine = QtLottieDrawEngineFactory::create("rlottie");
-        if (!available()) {
-            qWarning() << "Failed to initialize the rlottie backend.";
-            dispose();
-            return;
-        }
+        return;
     }
     // Use "Qt::PreciseTimer" to get the best appearance, however, it
     // will have a performance impact.

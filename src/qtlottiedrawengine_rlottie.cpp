@@ -29,15 +29,16 @@
 #include <QtCore/qfile.h>
 #include <QtCore/qvariant.h>
 #include <QtCore/qcoreapplication.h>
+#include <QtCore/qmutex.h>
 
-static const char _env_var_rlottie_name[] = "QTLOTTIE_RLOTTIE_NAME";
+static constexpr const char kFileName[] = "QTLOTTIE_RLOTTIE_FILENAME";
 
-static inline QString getRLottieLibraryName()
+[[nodiscard]] static inline QString getRLottieLibraryName()
 {
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
-    return qEnvironmentVariable(_env_var_rlottie_name, QStringLiteral("rlottie"));
+    return qEnvironmentVariable(kFileName, QStringLiteral("rlottie"));
 #else
-    const QByteArray ba = qgetenv(_env_var_rlottie_name);
+    const QByteArray ba = qgetenv(kFileName);
     return ba.isEmpty() ? QStringLiteral("rlottie") : QString::fromUtf8(ba);
 #endif
 }
@@ -57,6 +58,8 @@ class rlottie_data
     Q_DISABLE_COPY_MOVE(rlottie_data)
 
 public:
+    mutable QMutex mutex;
+
     lottie_init_ptr lottie_init_pfn = nullptr;
     lottie_shutdown_ptr lottie_shutdown_pfn = nullptr;
     lottie_animation_destroy_ptr lottie_animation_destroy_pfn = nullptr;
@@ -81,69 +84,51 @@ public:
 
     [[nodiscard]] bool load(const QString &libName = {})
     {
-        if (rlottieLib.isLoaded()) {
-            qDebug() << "rlottie library already loaded. Unloading ...";
-            if (!unload()) {
-                return false;
-            }
+        if (isLoaded()) {
+            qDebug() << "rlottie library has already been loaded.";
+            return true;
         }
-        rlottieLib.setFileName(libName.isEmpty() ? getRLottieLibraryName() : libName);
-        if (!rlottieLib.load()) {
-            qWarning() << "Failed to load rlottie library:" << rlottieLib.errorString();
+
+        const QMutexLocker locker(&mutex);
+
+        library.setFileName(libName.isEmpty() ? getRLottieLibraryName() : libName);
+        if (!library.load()) {
+            qWarning() << "Failed to load rlottie library:" << library.errorString();
             return false;
         }
-        qDebug() << "rlottie library loaded successfully from" << rlottieLib.fileName();
+        qDebug() << "rlottie library loaded successfully from" << library.fileName();
 
-        lottie_init_pfn = reinterpret_cast<lottie_init_ptr>(rlottieLib.resolve("lottie_init"));
-        if (!lottie_init_pfn) {
-            qWarning() << "Failed to resolve lottie_init";
-        }
+        #define RESOLVE(API) \
+            API##_pfn = reinterpret_cast<API##_ptr>(library.resolve(#API)); \
+            if (!API##_pfn) { \
+                qWarning() << "Failed to resolve " #API; \
+                return false; \
+            }
 
-        lottie_shutdown_pfn = reinterpret_cast<lottie_shutdown_ptr>(rlottieLib.resolve("lottie_shutdown"));
-        if (!lottie_shutdown_pfn) {
-            qWarning() << "Failed to resolve lottie_shutdown";
-        }
+        RESOLVE(lottie_init)
+        RESOLVE(lottie_shutdown)
+        RESOLVE(lottie_animation_destroy)
+        RESOLVE(lottie_animation_from_data)
+        RESOLVE(lottie_animation_get_framerate)
+        RESOLVE(lottie_animation_get_totalframe)
+        RESOLVE(lottie_animation_render)
+        RESOLVE(lottie_animation_get_size)
+        RESOLVE(lottie_animation_get_duration)
 
-        lottie_animation_destroy_pfn = reinterpret_cast<lottie_animation_destroy_ptr>(rlottieLib.resolve("lottie_animation_destroy"));
-        if (!lottie_animation_destroy_pfn) {
-            qWarning() << "Failed to resolve lottie_animation_destroy";
-        }
+        #undef RESOLVE
 
-        lottie_animation_from_data_pfn = reinterpret_cast<lottie_animation_from_data_ptr>(rlottieLib.resolve("lottie_animation_from_data"));
-        if (!lottie_animation_from_data_pfn) {
-            qWarning() << "Failed to resolve lottie_animation_from_data";
-        }
-
-        lottie_animation_get_framerate_pfn = reinterpret_cast<lottie_animation_get_framerate_ptr>(rlottieLib.resolve("lottie_animation_get_framerate"));
-        if (!lottie_animation_get_framerate_pfn) {
-            qWarning() << "Failed to resolve lottie_animation_get_framerate";
-        }
-
-        lottie_animation_get_totalframe_pfn = reinterpret_cast<lottie_animation_get_totalframe_ptr>(rlottieLib.resolve("lottie_animation_get_totalframe"));
-        if (!lottie_animation_get_totalframe_pfn) {
-            qWarning() << "Failed to resolve lottie_animation_get_totalframe";
-        }
-
-        lottie_animation_render_pfn = reinterpret_cast<lottie_animation_render_ptr>(rlottieLib.resolve("lottie_animation_render"));
-        if (!lottie_animation_render_pfn) {
-            qWarning() << "Failed to resolve lottie_animation_render";
-        }
-
-        lottie_animation_get_size_pfn = reinterpret_cast<lottie_animation_get_size_ptr>(rlottieLib.resolve("lottie_animation_get_size"));
-        if (!lottie_animation_get_size_pfn) {
-            qWarning() << "Failed to resolve lottie_animation_get_size";
-        }
-
-        lottie_animation_get_duration_pfn = reinterpret_cast<lottie_animation_get_duration_ptr>(rlottieLib.resolve("lottie_animation_get_duration"));
-        if (!lottie_animation_get_duration_pfn) {
-            qWarning() << "Failed to resolve lottie_animation_get_duration";
-        }
-
-        return isLoaded();
+        return true;
     }
 
     [[nodiscard]] bool unload()
     {
+        if (!isLoaded()) {
+            qDebug() << "rlottie library has already been unloaded.";
+            return true;
+        }
+
+        const QMutexLocker locker(&mutex);
+
         lottie_init_pfn = nullptr;
         lottie_shutdown_pfn = nullptr;
         lottie_animation_destroy_pfn = nullptr;
@@ -154,11 +139,9 @@ public:
         lottie_animation_get_size_pfn = nullptr;
         lottie_animation_get_duration_pfn = nullptr;
 
-        if (rlottieLib.isLoaded()) {
-            if (!rlottieLib.unload()) {
-                qWarning() << "Failed to unload rlottie library:" << rlottieLib.errorString();
-                return false;
-            }
+        if (!library.unload()) {
+            qWarning() << "Failed to unload rlottie library:" << library.errorString();
+            return false;
         }
 
         return true;
@@ -166,15 +149,16 @@ public:
 
     [[nodiscard]] bool isLoaded() const
     {
-        return rlottieLib.isLoaded() && lottie_init_pfn
-                && lottie_shutdown_pfn && lottie_animation_destroy_pfn
+        const QMutexLocker locker(&mutex);
+
+        return lottie_init_pfn && lottie_shutdown_pfn && lottie_animation_destroy_pfn
                 && lottie_animation_from_data_pfn && lottie_animation_get_framerate_pfn
                 && lottie_animation_get_totalframe_pfn && lottie_animation_render_pfn
                 && lottie_animation_get_size_pfn && lottie_animation_get_duration_pfn;
     }
 
 private:
-    QLibrary rlottieLib;
+    QLibrary library;
 };
 
 Q_GLOBAL_STATIC(rlottie_data, rlottie)
@@ -182,32 +166,28 @@ Q_GLOBAL_STATIC(rlottie_data, rlottie)
 QtLottieRLottieEngine::QtLottieRLottieEngine(QObject *parent) : QtLottieDrawEngine(parent)
 {
     if (rlottie()->isLoaded()) {
+        const QMutexLocker locker(&rlottie()->mutex);
         rlottie()->lottie_init_pfn();
     } else {
-        qWarning() << "rlottie library not loaded.";
+        qWarning() << "The rlottie backend is not available due to can't load rlottie library.";
     }
 }
 
 QtLottieRLottieEngine::~QtLottieRLottieEngine()
 {
-    if (m_animation && rlottie()->lottie_animation_destroy_pfn) {
+    if (!rlottie()->isLoaded()) {
+        return;
+    }
+    const QMutexLocker locker(&rlottie()->mutex);
+    if (m_animation) {
         rlottie()->lottie_animation_destroy_pfn(m_animation);
     }
-    if (rlottie()->lottie_shutdown_pfn) {
-        rlottie()->lottie_shutdown_pfn();
-    }
+    rlottie()->lottie_shutdown_pfn();
 }
 
 bool QtLottieRLottieEngine::setSource(const QUrl &value)
 {
-    Q_ASSERT(rlottie()->lottie_animation_from_data_pfn);
-    Q_ASSERT(rlottie()->lottie_animation_get_framerate_pfn);
-    Q_ASSERT(rlottie()->lottie_animation_get_totalframe_pfn);
-    Q_ASSERT(rlottie()->lottie_animation_get_size_pfn);
-    Q_ASSERT(rlottie()->lottie_animation_get_duration_pfn);
-    if (!rlottie()->lottie_animation_from_data_pfn || !rlottie()->lottie_animation_get_framerate_pfn
-            || !rlottie()->lottie_animation_get_totalframe_pfn || !rlottie()->lottie_animation_get_size_pfn
-            || !rlottie()->lottie_animation_get_duration_pfn) {
+    if (!rlottie()->isLoaded()) {
         qWarning() << Q_FUNC_INFO << "some necessary rlottie functions are not available.";
         return false;
     }
@@ -247,16 +227,20 @@ bool QtLottieRLottieEngine::setSource(const QUrl &value)
     }
     // TODO: support embeded resources.
     const QString resDirPath = QCoreApplication::applicationDirPath();
+    rlottie()->mutex.lock();
     m_animation = rlottie()->lottie_animation_from_data_pfn(jsonBuffer.constData(), jsonBuffer.constData(), resDirPath.toUtf8().constData());
+    rlottie()->mutex.unlock();
     if (!m_animation) {
         qWarning() << "Failed to create lottie animation.";
         return false;
     }
     m_source = value;
+    rlottie()->mutex.lock();
     rlottie()->lottie_animation_get_size_pfn(m_animation, reinterpret_cast<size_t *>(&m_width), reinterpret_cast<size_t *>(&m_height));
     m_frameRate = rlottie()->lottie_animation_get_framerate_pfn(m_animation);
     m_duration = rlottie()->lottie_animation_get_duration_pfn(m_animation);
     m_totalFrame = rlottie()->lottie_animation_get_totalframe_pfn(m_animation);
+    rlottie()->mutex.unlock();
     m_frameBuffer.reset(new char[m_width * m_height * 32 / 8]);
     // Clear previous status.
     m_currentFrame = 0;
@@ -353,7 +337,7 @@ void QtLottieRLottieEngine::paint(QPainter *painter, const QSizeF &s)
     QImage image(m_width, m_height, QImage::Format_ARGB32);
     for (int i = 0; i != image.height(); ++i) {
         char *p = m_frameBuffer.data() + i * image.bytesPerLine();
-        memcpy(image.scanLine(i), p, image.bytesPerLine());
+        std::memcpy(image.scanLine(i), p, image.bytesPerLine());
     }
     // TODO: let the user be able to set the scale mode.
     // "Qt::SmoothTransformation" is a must otherwise the scaled image will become fuzzy.
@@ -368,15 +352,16 @@ void QtLottieRLottieEngine::render(const QSizeF &s)
         // Or the rlottie library is not loaded. Safe to ignore.
         return;
     }
-    Q_ASSERT(rlottie()->lottie_animation_render_pfn);
-    if (!rlottie()->lottie_animation_render_pfn) {
+    if (!rlottie()->isLoaded()) {
         qWarning() << Q_FUNC_INFO << "some necessary rlottie functions are not available.";
         return;
     }
     if (m_shouldStop) {
         return;
     }
+    rlottie()->mutex.lock();
     rlottie()->lottie_animation_render_pfn(m_animation, m_currentFrame, reinterpret_cast<uint32_t *>(m_frameBuffer.data()), m_width, m_height, m_width * 32 / 8);
+    rlottie()->mutex.unlock();
     if (m_currentFrame >= m_totalFrame) {
         m_currentFrame = 0;
         // negative number means infinite loops.

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (C) 2021 by wangwenx190 (Yuhang Zhao)
+ * Copyright (C) 2022 by wangwenx190 (Yuhang Zhao)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,21 +30,21 @@
 #include <QtCore/qsize.h>
 
 QT_BEGIN_NAMESPACE
-QT_FORWARD_DECLARE_CLASS(QPainter)
+class QPainter;
 QT_END_NAMESPACE
 
 class QTLOTTIE_API QtLottieDrawEngine : public QObject
 {
     Q_OBJECT
     Q_DISABLE_COPY_MOVE(QtLottieDrawEngine)
-    Q_PROPERTY(QString name READ name CONSTANT)
-    Q_PROPERTY(QUrl source READ source WRITE setSource NOTIFY sourceChanged)
-    Q_PROPERTY(qreal frameRate READ frameRate NOTIFY frameRateChanged)
-    Q_PROPERTY(qreal duration READ duration NOTIFY durationChanged)
-    Q_PROPERTY(QSizeF size READ size NOTIFY sizeChanged)
-    Q_PROPERTY(int loops READ loops WRITE setLoops NOTIFY loopsChanged)
-    Q_PROPERTY(bool available READ available CONSTANT)
-    Q_PROPERTY(bool playing READ playing NOTIFY playingChanged)
+    Q_PROPERTY(QString name READ name CONSTANT FINAL)
+    Q_PROPERTY(QUrl source READ source WRITE setSource NOTIFY sourceChanged FINAL)
+    Q_PROPERTY(qreal frameRate READ frameRate NOTIFY frameRateChanged FINAL)
+    Q_PROPERTY(qreal duration READ duration NOTIFY durationChanged FINAL)
+    Q_PROPERTY(QSizeF size READ size NOTIFY sizeChanged FINAL)
+    Q_PROPERTY(int loops READ loops WRITE setLoops NOTIFY loopsChanged FINAL)
+    Q_PROPERTY(bool available READ available CONSTANT FINAL)
+    Q_PROPERTY(bool playing READ playing NOTIFY playingChanged FINAL)
 
 public:
     explicit QtLottieDrawEngine(QObject *parent = nullptr) : QObject(parent) {}

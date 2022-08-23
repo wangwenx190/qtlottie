@@ -35,13 +35,13 @@ class QTLOTTIE_API QtLottieWidget : public QWidget
 {
     Q_OBJECT
     Q_DISABLE_COPY_MOVE(QtLottieWidget)
-    Q_PROPERTY(QString backend READ backend CONSTANT)
-    Q_PROPERTY(QUrl source READ source WRITE setSource NOTIFY sourceChanged)
-    Q_PROPERTY(int frameRate READ frameRate NOTIFY frameRateChanged)
-    Q_PROPERTY(int duration READ duration NOTIFY durationChanged)
-    Q_PROPERTY(QSize sourceSize READ sourceSize NOTIFY sourceSizeChanged)
-    Q_PROPERTY(int loops READ loops WRITE setLoops NOTIFY loopsChanged)
-    Q_PROPERTY(bool available READ available CONSTANT)
+    Q_PROPERTY(QString backend READ backend CONSTANT FINAL)
+    Q_PROPERTY(QUrl source READ source WRITE setSource NOTIFY sourceChanged FINAL)
+    Q_PROPERTY(int frameRate READ frameRate NOTIFY frameRateChanged FINAL)
+    Q_PROPERTY(int duration READ duration NOTIFY durationChanged FINAL)
+    Q_PROPERTY(QSize sourceSize READ sourceSize NOTIFY sourceSizeChanged FINAL)
+    Q_PROPERTY(int loops READ loops WRITE setLoops NOTIFY loopsChanged FINAL)
+    Q_PROPERTY(bool available READ available CONSTANT FINAL)
 
 public:
     explicit QtLottieWidget(QWidget *parent = nullptr);

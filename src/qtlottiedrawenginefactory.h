@@ -32,5 +32,6 @@ namespace QtLottieDrawEngineFactory
 {
 
 QTLOTTIE_API QtLottieDrawEngine *create(const char *name);
+QTLOTTIE_API QtLottieDrawEngine *create();
 
 }

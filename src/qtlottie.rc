@@ -42,7 +42,7 @@ BEGIN
         BLOCK "040904b0"
         BEGIN
             VALUE "CompanyName",      "wangwenx190"
-            VALUE "FileDescription",  "QtLottie"
+            VALUE "FileDescription",  "QtLottie is a tiny C++ library that can render Adobe After Effects animations exported as JSON with Bodymovin."
             VALUE "FileVersion",      "1.0.0.0"
             VALUE "LegalCopyright",   "MIT License"
             #ifdef _DEBUG
@@ -52,7 +52,6 @@ BEGIN
             #endif
             VALUE "ProductName",      "QtLottie"
             VALUE "ProductVersion",   "1.0.0.0"
-            VALUE "InternalName",     "qtlottie"
         END
     END
     BLOCK "VarFileInfo"

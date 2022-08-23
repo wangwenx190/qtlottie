@@ -37,13 +37,13 @@ class QTLOTTIE_API QtLottieItem : public QQuickPaintedItem
 #ifdef QML_NAMED_ELEMENT
     QML_NAMED_ELEMENT(LottieItem)
 #endif
-    Q_PROPERTY(QString backend READ backend CONSTANT)
-    Q_PROPERTY(QUrl source READ source WRITE setSource NOTIFY sourceChanged)
-    Q_PROPERTY(qreal frameRate READ frameRate NOTIFY frameRateChanged)
-    Q_PROPERTY(qreal duration READ duration NOTIFY durationChanged)
-    Q_PROPERTY(QSizeF sourceSize READ sourceSize NOTIFY sourceSizeChanged)
-    Q_PROPERTY(int loops READ loops WRITE setLoops NOTIFY loopsChanged)
-    Q_PROPERTY(bool available READ available CONSTANT)
+    Q_PROPERTY(QString backend READ backend CONSTANT FINAL)
+    Q_PROPERTY(QUrl source READ source WRITE setSource NOTIFY sourceChanged FINAL)
+    Q_PROPERTY(qreal frameRate READ frameRate NOTIFY frameRateChanged FINAL)
+    Q_PROPERTY(qreal duration READ duration NOTIFY durationChanged FINAL)
+    Q_PROPERTY(QSizeF sourceSize READ sourceSize NOTIFY sourceSizeChanged FINAL)
+    Q_PROPERTY(int loops READ loops WRITE setLoops NOTIFY loopsChanged FINAL)
+    Q_PROPERTY(bool available READ available CONSTANT FINAL)
 
 public:
     explicit QtLottieItem(QQuickItem *parent = nullptr);

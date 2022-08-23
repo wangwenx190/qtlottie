@@ -27,6 +27,8 @@
 #include "qtlottiedrawengine_rlottie.h"
 #include <QtCore/qdebug.h>
 
+static constexpr const char kPreferredEngine[] = "QTLOTTIE_PREFERRED_ENGINE";
+
 QtLottieDrawEngine *QtLottieDrawEngineFactory::create(const char *name)
 {
     Q_ASSERT(name);
@@ -34,13 +36,32 @@ QtLottieDrawEngine *QtLottieDrawEngineFactory::create(const char *name)
         return nullptr;
     }
     if (qstricmp(name, "skottie") == 0) {
-        qDebug() << "Trying the skottie backend ...";
         return new QtLottieSkottieEngine();
-    } else if (qstricmp(name, "rlottie") == 0) {
-        qDebug() << "Trying the rlottie backend ...";
-        return new QtLottieRLottieEngine();
-    } else {
-        qWarning() << "Unsupported lottie backend:" << name;
     }
+    if (qstricmp(name, "rlottie") == 0) {
+        return new QtLottieRLottieEngine();
+    }
+    qWarning() << "Unsupported lottie backend:" << name;
+    return nullptr;
+}
+
+QtLottieDrawEngine *QtLottieDrawEngineFactory::create()
+{
+    const QString preferred = qEnvironmentVariable(kPreferredEngine, QStringLiteral("skottie"));
+    if (const auto engine = create(qUtf8Printable(preferred))) {
+        if (engine->available()) {
+            return engine;
+        }
+        engine->release();
+        qWarning() << preferred << "is not available.";
+    }
+    if (const auto engine = create("rlottie")) {
+        if (engine->available()) {
+            return engine;
+        }
+        engine->release();
+        qWarning() << "rlottie is not available.";
+    }
+    // ### TODO: Use Qt Lottie (provided by TQtC) as the final fallback.
     return nullptr;
 }
