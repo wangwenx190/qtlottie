@@ -45,21 +45,21 @@ QtLottieWidget::QtLottieWidget(QWidget *parent) : QWidget(parent)
         }
     });
     connect(m_drawEngine, &QtLottieDrawEngine::needsRepaint, this, qOverload<>(&QtLottieWidget::update));
-    connect(m_drawEngine, &QtLottieDrawEngine::frameRateChanged, this, [this](qreal arg){
+    connect(m_drawEngine, &QtLottieDrawEngine::frameRateChanged, this, [this](qint64 arg){
         if (m_timer.isActive()) {
             m_timer.stop();
         }
-        m_timer.setInterval(qRound(1000.0 / arg));
+        m_timer.setInterval(qRound(qreal(1000) / qreal(arg)));
         if (m_drawEngine->playing()) {
             m_timer.start();
         }
-        Q_EMIT frameRateChanged(qRound(arg));
+        Q_EMIT frameRateChanged(arg);
     });
     connect(m_drawEngine, &QtLottieDrawEngine::playingChanged, this, [this](bool arg){
         if (arg) {
             if (!m_timer.isActive()) {
                 if (m_timer.interval() <= 0) {
-                    m_timer.setInterval(qRound(1000.0 / m_drawEngine->frameRate()));
+                    m_timer.setInterval(qRound(qreal(1000) / qreal(m_drawEngine->frameRate())));
                 }
                 m_timer.start();
             }
@@ -69,13 +69,10 @@ QtLottieWidget::QtLottieWidget(QWidget *parent) : QWidget(parent)
             }
         }
     });
-    connect(m_drawEngine, &QtLottieDrawEngine::durationChanged, this, [this](qreal arg){
-        Q_EMIT durationChanged(qRound(arg));
-    });
-    connect(m_drawEngine, &QtLottieDrawEngine::sizeChanged, this, [this](const QSizeF &arg){
-        Q_EMIT sourceSizeChanged(arg.toSize());
-    });
+    connect(m_drawEngine, &QtLottieDrawEngine::durationChanged, this, &QtLottieWidget::durationChanged);
+    connect(m_drawEngine, &QtLottieDrawEngine::sizeChanged, this, &QtLottieWidget::sourceSizeChanged);
     connect(m_drawEngine, &QtLottieDrawEngine::loopsChanged, this, &QtLottieWidget::loopsChanged);
+    connect(m_drawEngine, &QtLottieDrawEngine::devicePixelRatioChanged, this, &QtLottieWidget::devicePixelRatioChanged);
 }
 
 QtLottieWidget::~QtLottieWidget()
@@ -142,30 +139,30 @@ void QtLottieWidget::setSource(const QUrl &value)
     }
 }
 
-int QtLottieWidget::frameRate() const
+qint64 QtLottieWidget::frameRate() const
 {
     // TODO: is the fallback value appropriate?
-    return available() ? qRound(m_drawEngine->frameRate()) : 30;
+    return available() ? m_drawEngine->frameRate() : 30;
 }
 
-int QtLottieWidget::duration() const
+qint64 QtLottieWidget::duration() const
 {
     // TODO: is the fallback value appropriate?
-    return available() ? qRound(m_drawEngine->duration()) : 0;
+    return available() ? m_drawEngine->duration() : 0;
 }
 
 QSize QtLottieWidget::sourceSize() const
 {
     // TODO: is the fallback value appropriate?
-    return available() ? m_drawEngine->size().toSize() : QSize{50, 50};
+    return available() ? m_drawEngine->size() : QSize{50, 50};
 }
 
-int QtLottieWidget::loops() const
+qint64 QtLottieWidget::loops() const
 {
     return available() ? m_drawEngine->loops() : 0;
 }
 
-void QtLottieWidget::setLoops(const int value)
+void QtLottieWidget::setLoops(const qint64 value)
 {
     if (available()) {
         m_drawEngine->setLoops(value);
@@ -175,6 +172,19 @@ void QtLottieWidget::setLoops(const int value)
 bool QtLottieWidget::available() const
 {
     return (m_drawEngine && m_drawEngine->available());
+}
+
+qreal QtLottieWidget::devicePixelRatio() const
+{
+    return available() ? m_drawEngine->devicePixelRatio() : qreal(1);
+}
+
+void QtLottieWidget::setDevicePixelRatio(const qreal value)
+{
+    if (!available()) {
+        return;
+    }
+    m_drawEngine->setDevicePixelRatio(value);
 }
 
 void QtLottieWidget::paintEvent(QPaintEvent *event)

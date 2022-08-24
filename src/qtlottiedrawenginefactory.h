@@ -31,6 +31,13 @@ class QtLottieDrawEngine;
 namespace QtLottieDrawEngineFactory
 {
 
+enum class Backend
+{
+    Skottie = 0,
+    RLottie = 1
+};
+
+QTLOTTIE_API QtLottieDrawEngine *create(const Backend backend);
 QTLOTTIE_API QtLottieDrawEngine *create(const char *name);
 QTLOTTIE_API QtLottieDrawEngine *create();
 

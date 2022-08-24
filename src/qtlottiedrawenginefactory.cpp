@@ -29,6 +29,17 @@
 
 static constexpr const char kPreferredEngine[] = "QTLOTTIE_PREFERRED_ENGINE";
 
+QtLottieDrawEngine *QtLottieDrawEngineFactory::create(const Backend backend)
+{
+    switch (backend) {
+    case Backend::Skottie:
+        return new QtLottieSkottieEngine();
+    case Backend::RLottie:
+        return new QtLottieRLottieEngine();
+    }
+    return nullptr;
+}
+
 QtLottieDrawEngine *QtLottieDrawEngineFactory::create(const char *name)
 {
     Q_ASSERT(name);
@@ -36,10 +47,10 @@ QtLottieDrawEngine *QtLottieDrawEngineFactory::create(const char *name)
         return nullptr;
     }
     if (qstricmp(name, "skottie") == 0) {
-        return new QtLottieSkottieEngine();
+        return create(Backend::Skottie);
     }
     if (qstricmp(name, "rlottie") == 0) {
-        return new QtLottieRLottieEngine();
+        return create(Backend::RLottie);
     }
     qWarning() << "Unsupported lottie backend:" << name;
     return nullptr;

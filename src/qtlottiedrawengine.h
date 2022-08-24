@@ -39,19 +39,20 @@ class QTLOTTIE_API QtLottieDrawEngine : public QObject
     Q_DISABLE_COPY_MOVE(QtLottieDrawEngine)
     Q_PROPERTY(QString name READ name CONSTANT FINAL)
     Q_PROPERTY(QUrl source READ source WRITE setSource NOTIFY sourceChanged FINAL)
-    Q_PROPERTY(qreal frameRate READ frameRate NOTIFY frameRateChanged FINAL)
-    Q_PROPERTY(qreal duration READ duration NOTIFY durationChanged FINAL)
-    Q_PROPERTY(QSizeF size READ size NOTIFY sizeChanged FINAL)
-    Q_PROPERTY(int loops READ loops WRITE setLoops NOTIFY loopsChanged FINAL)
+    Q_PROPERTY(qint64 frameRate READ frameRate NOTIFY frameRateChanged FINAL)
+    Q_PROPERTY(qint64 duration READ duration NOTIFY durationChanged FINAL)
+    Q_PROPERTY(QSize size READ size NOTIFY sizeChanged FINAL)
+    Q_PROPERTY(qint64 loops READ loops WRITE setLoops NOTIFY loopsChanged FINAL)
     Q_PROPERTY(bool available READ available CONSTANT FINAL)
     Q_PROPERTY(bool playing READ playing NOTIFY playingChanged FINAL)
+    Q_PROPERTY(qreal devicePixelRatio READ devicePixelRatio WRITE setDevicePixelRatio NOTIFY devicePixelRatioChanged FINAL)
 
 public:
     explicit QtLottieDrawEngine(QObject *parent = nullptr) : QObject(parent) {}
     ~QtLottieDrawEngine() override = default;
 
-    virtual void paint(QPainter *painter, const QSizeF &s) = 0;
-    virtual void render(const QSizeF &s) = 0;
+    virtual void paint(QPainter *painter, const QSize &s) = 0;
+    virtual void render(const QSize &s) = 0;
     virtual void release() = 0;
 
     virtual QString name() const = 0;
@@ -59,18 +60,21 @@ public:
     virtual QUrl source() const = 0;
     virtual bool setSource(const QUrl &value) = 0;
 
-    virtual qreal frameRate() const = 0;
+    virtual qint64 frameRate() const = 0;
 
-    virtual qreal duration() const = 0;
+    virtual qint64 duration() const = 0;
 
-    virtual QSizeF size() const = 0;
+    virtual QSize size() const = 0;
 
-    virtual int loops() const = 0;
-    virtual void setLoops(const int value) = 0;
+    virtual qint64 loops() const = 0;
+    virtual void setLoops(const qint64 value) = 0;
 
     virtual bool available() const = 0;
 
     virtual bool playing() const = 0;
+
+    virtual qreal devicePixelRatio() const = 0;
+    virtual void setDevicePixelRatio(const qreal value) = 0;
 
 public Q_SLOTS:
     virtual void pause() = 0;
@@ -78,11 +82,12 @@ public Q_SLOTS:
 
 Q_SIGNALS:
     void sourceChanged(const QUrl &);
-    void frameRateChanged(qreal);
-    void durationChanged(qreal);
-    void sizeChanged(const QSizeF &);
-    void loopsChanged(int);
+    void frameRateChanged(qint64);
+    void durationChanged(qint64);
+    void sizeChanged(const QSize &);
+    void loopsChanged(qint64);
     void playingChanged(bool);
+    void devicePixelRatioChanged(qreal);
 
     void needsRepaint();
 };

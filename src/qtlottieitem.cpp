@@ -45,17 +45,17 @@ QtLottieItem::QtLottieItem(QQuickItem *parent) : QQuickPaintedItem(parent)
 #else
             const QSizeF s = {width(), height()};
 #endif
-            m_drawEngine->render(s);
+            m_drawEngine->render(s.toSize());
         }
     });
     connect(m_drawEngine, &QtLottieDrawEngine::needsRepaint, this, [this](){
         update();
     });
-    connect(m_drawEngine, &QtLottieDrawEngine::frameRateChanged, this, [this](qreal arg){
+    connect(m_drawEngine, &QtLottieDrawEngine::frameRateChanged, this, [this](qint64 arg){
         if (m_timer.isActive()) {
             m_timer.stop();
         }
-        m_timer.setInterval(qRound(1000.0 / arg));
+        m_timer.setInterval(qRound(qreal(1000) / qreal(arg)));
         if (m_drawEngine->playing()) {
             m_timer.start();
         }
@@ -65,7 +65,7 @@ QtLottieItem::QtLottieItem(QQuickItem *parent) : QQuickPaintedItem(parent)
         if (arg) {
             if (!m_timer.isActive()) {
                 if (m_timer.interval() <= 0) {
-                    m_timer.setInterval(qRound(1000.0 / m_drawEngine->frameRate()));
+                    m_timer.setInterval(qRound(qreal(1000) / qreal(m_drawEngine->frameRate())));
                 }
                 m_timer.start();
             }
@@ -78,6 +78,7 @@ QtLottieItem::QtLottieItem(QQuickItem *parent) : QQuickPaintedItem(parent)
     connect(m_drawEngine, &QtLottieDrawEngine::durationChanged, this, &QtLottieItem::durationChanged);
     connect(m_drawEngine, &QtLottieDrawEngine::sizeChanged, this, &QtLottieItem::sourceSizeChanged);
     connect(m_drawEngine, &QtLottieDrawEngine::loopsChanged, this, &QtLottieItem::loopsChanged);
+    connect(m_drawEngine, &QtLottieDrawEngine::devicePixelRatioChanged, this, &QtLottieItem::devicePixelRatioChanged);
 }
 
 QtLottieItem::~QtLottieItem()
@@ -97,7 +98,7 @@ void QtLottieItem::paint(QPainter *painter)
 #else
         const QSizeF s = {width(), height()};
 #endif
-        m_drawEngine->paint(painter, s);
+        m_drawEngine->paint(painter, s.toSize());
     }
 }
 
@@ -153,30 +154,30 @@ void QtLottieItem::setSource(const QUrl &value)
     }
 }
 
-qreal QtLottieItem::frameRate() const
+qint64 QtLottieItem::frameRate() const
 {
     // TODO: is the fallback value appropriate?
-    return available() ? m_drawEngine->frameRate() : 30.0;
+    return available() ? m_drawEngine->frameRate() : 30;
 }
 
-qreal QtLottieItem::duration() const
+qint64 QtLottieItem::duration() const
 {
     // TODO: is the fallback value appropriate?
-    return available() ? m_drawEngine->duration() : 0.0;
+    return available() ? m_drawEngine->duration() : 0;
 }
 
 QSizeF QtLottieItem::sourceSize() const
 {
     // TODO: is the fallback value appropriate?
-    return available() ? m_drawEngine->size() : QSizeF{50.0, 50.0};
+    return available() ? m_drawEngine->size() : QSizeF{qreal(50), qreal(50)};
 }
 
-int QtLottieItem::loops() const
+qint64 QtLottieItem::loops() const
 {
     return available() ? m_drawEngine->loops() : 0;
 }
 
-void QtLottieItem::setLoops(const int value)
+void QtLottieItem::setLoops(const qint64 value)
 {
     if (available()) {
         m_drawEngine->setLoops(value);
@@ -186,4 +187,17 @@ void QtLottieItem::setLoops(const int value)
 bool QtLottieItem::available() const
 {
     return (m_drawEngine && m_drawEngine->available());
+}
+
+qreal QtLottieItem::devicePixelRatio() const
+{
+    return available() ? m_drawEngine->devicePixelRatio() : qreal(1);
+}
+
+void QtLottieItem::setDevicePixelRatio(const qreal value)
+{
+    if (!available()) {
+        return;
+    }
+    m_drawEngine->setDevicePixelRatio(value);
 }

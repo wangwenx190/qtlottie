@@ -25,10 +25,11 @@
 #include "qtlottiedrawengine_skottie.h"
 #include <QtCore/qlibrary.h>
 #include <QtCore/qdebug.h>
-#include <QtCore/qcoreapplication.h>
 #include <QtGui/qpainter.h>
 #include <QtCore/qfile.h>
 #include <QtCore/qmutex.h>
+#include <QtGui/qscreen.h>
+#include <QtGui/qguiapplication.h>
 
 static constexpr const char kFileName[] = "QTLOTTIE_SKOTTIE_FILENAME";
 
@@ -183,7 +184,13 @@ Q_GLOBAL_STATIC(skottie_data, skottie)
 
 QtLottieSkottieEngine::QtLottieSkottieEngine(QObject *parent) : QtLottieDrawEngine(parent)
 {
-    if (!skottie()->isLoaded()) {
+    if (skottie()->isLoaded()) {
+        if (const auto screen = QGuiApplication::primaryScreen()) {
+            m_devicePixelRatio = screen->devicePixelRatio();
+        } else {
+            m_devicePixelRatio = 1.0;
+        }
+    } else {
         qWarning() << "The skottie backend is not available due to can't load skottie library.";
     }
 }
@@ -198,7 +205,7 @@ QtLottieSkottieEngine::~QtLottieSkottieEngine()
     }
 }
 
-void QtLottieSkottieEngine::paint(QPainter *painter, const QSizeF &s)
+void QtLottieSkottieEngine::paint(QPainter *painter, const QSize &s)
 {
     Q_ASSERT(painter);
     if (!painter) {
@@ -246,10 +253,10 @@ void QtLottieSkottieEngine::paint(QPainter *painter, const QSizeF &s)
     skottie()->mutex.lock();
     skottie()->skottie_delete_pixmap_pfn(pixmap);
     skottie()->mutex.unlock();
-    painter->drawImage(QPointF{0, 0}, image);
+    painter->drawImage(QPoint{0, 0}, image);
 }
 
-void QtLottieSkottieEngine::render(const QSizeF &s)
+void QtLottieSkottieEngine::render(const QSize &s)
 {
     Q_UNUSED(s);
     if (!m_animation) {
@@ -347,8 +354,8 @@ bool QtLottieSkottieEngine::setSource(const QUrl &value)
     m_source = value;
     skottie()->mutex.lock();
     skottie()->skottie_animation_get_size_pfn(m_animation, reinterpret_cast<size_t *>(&m_width), reinterpret_cast<size_t *>(&m_height));
-    m_frameRate = skottie()->skottie_animation_get_framerate_pfn(m_animation);
-    m_duration = skottie()->skottie_animation_get_duration_pfn(m_animation);
+    m_frameRate = qRound64(skottie()->skottie_animation_get_framerate_pfn(m_animation));
+    m_duration = qRound64(skottie()->skottie_animation_get_duration_pfn(m_animation));
     m_totalFrame = skottie()->skottie_animation_get_totalframe_pfn(m_animation);
     skottie()->mutex.unlock();
     // Clear previous status.
@@ -363,27 +370,27 @@ bool QtLottieSkottieEngine::setSource(const QUrl &value)
     return true;
 }
 
-qreal QtLottieSkottieEngine::frameRate() const
+qint64 QtLottieSkottieEngine::frameRate() const
 {
     return m_frameRate;
 }
 
-qreal QtLottieSkottieEngine::duration() const
+qint64 QtLottieSkottieEngine::duration() const
 {
     return m_duration;
 }
 
-QSizeF QtLottieSkottieEngine::size() const
+QSize QtLottieSkottieEngine::size() const
 {
-    return {static_cast<qreal>(m_width), static_cast<qreal>(m_height)};
+    return {int(m_width), int(m_height)};
 }
 
-int QtLottieSkottieEngine::loops() const
+qint64 QtLottieSkottieEngine::loops() const
 {
     return m_loops;
 }
 
-void QtLottieSkottieEngine::setLoops(const int value)
+void QtLottieSkottieEngine::setLoops(const qint64 value)
 {
     if (m_loops != value) {
         m_loops = value;
@@ -403,6 +410,20 @@ bool QtLottieSkottieEngine::available() const
 bool QtLottieSkottieEngine::playing() const
 {
     return (m_animation && !m_shouldStop);
+}
+
+qreal QtLottieSkottieEngine::devicePixelRatio() const
+{
+    return m_devicePixelRatio;
+}
+
+void QtLottieSkottieEngine::setDevicePixelRatio(const qreal value)
+{
+    if (qFuzzyCompare(m_devicePixelRatio, value)) {
+        return;
+    }
+    m_devicePixelRatio = value;
+    Q_EMIT devicePixelRatioChanged(m_devicePixelRatio);
 }
 
 void QtLottieSkottieEngine::pause()

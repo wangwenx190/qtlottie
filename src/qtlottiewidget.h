@@ -37,11 +37,12 @@ class QTLOTTIE_API QtLottieWidget : public QWidget
     Q_DISABLE_COPY_MOVE(QtLottieWidget)
     Q_PROPERTY(QString backend READ backend CONSTANT FINAL)
     Q_PROPERTY(QUrl source READ source WRITE setSource NOTIFY sourceChanged FINAL)
-    Q_PROPERTY(int frameRate READ frameRate NOTIFY frameRateChanged FINAL)
-    Q_PROPERTY(int duration READ duration NOTIFY durationChanged FINAL)
+    Q_PROPERTY(qint64 frameRate READ frameRate NOTIFY frameRateChanged FINAL)
+    Q_PROPERTY(qint64 duration READ duration NOTIFY durationChanged FINAL)
     Q_PROPERTY(QSize sourceSize READ sourceSize NOTIFY sourceSizeChanged FINAL)
-    Q_PROPERTY(int loops READ loops WRITE setLoops NOTIFY loopsChanged FINAL)
+    Q_PROPERTY(qint64 loops READ loops WRITE setLoops NOTIFY loopsChanged FINAL)
     Q_PROPERTY(bool available READ available CONSTANT FINAL)
+    Q_PROPERTY(qreal devicePixelRatio READ devicePixelRatio WRITE setDevicePixelRatio NOTIFY devicePixelRatioChanged FINAL)
 
 public:
     explicit QtLottieWidget(QWidget *parent = nullptr);
@@ -54,16 +55,19 @@ public:
     QUrl source() const;
     void setSource(const QUrl &value);
 
-    int frameRate() const;
+    qint64 frameRate() const;
 
-    int duration() const;
+    qint64 duration() const;
 
     QSize sourceSize() const;
 
-    int loops() const;
-    void setLoops(const int value);
+    qint64 loops() const;
+    void setLoops(const qint64 value);
 
     bool available() const;
+
+    qreal devicePixelRatio() const;
+    void setDevicePixelRatio(const qreal value);
 
 public Q_SLOTS:
     void dispose();
@@ -72,10 +76,11 @@ public Q_SLOTS:
 
 Q_SIGNALS:
     void sourceChanged(const QUrl &);
-    void frameRateChanged(int);
-    void durationChanged(int);
+    void frameRateChanged(qint64);
+    void durationChanged(qint64);
     void sourceSizeChanged(const QSize &);
-    void loopsChanged(int);
+    void loopsChanged(qint64);
+    void devicePixelRatioChanged(qreal);
 
 protected:
     void paintEvent(QPaintEvent *event) override;

@@ -37,8 +37,8 @@ public:
     explicit QtLottieRLottieEngine(QObject *parent = nullptr);
     ~QtLottieRLottieEngine() override;
 
-    void paint(QPainter *painter, const QSizeF &s) override;
-    void render(const QSizeF &s) override;
+    void paint(QPainter *painter, const QSize &s) override;
+    void render(const QSize &s) override;
     void release() override;
 
     QString name() const override;
@@ -46,18 +46,21 @@ public:
     QUrl source() const override;
     bool setSource(const QUrl &value) override;
 
-    qreal frameRate() const override;
+    qint64 frameRate() const override;
 
-    qreal duration() const override;
+    qint64 duration() const override;
 
-    QSizeF size() const override;
+    QSize size() const override;
 
-    int loops() const override;
-    void setLoops(const int value) override;
+    qint64 loops() const override;
+    void setLoops(const qint64 value) override;
 
     bool available() const override;
 
     bool playing() const override;
+
+    qreal devicePixelRatio() const override;
+    void setDevicePixelRatio(const qreal value) override;
 
 public Q_SLOTS:
     void pause() override;
@@ -72,9 +75,10 @@ private:
     quint64 m_width = 0;
     quint64 m_height = 0;
     bool m_hasFirstUpdate = false;
-    double m_frameRate = 0;
-    double m_duration = 0;
-    int m_loops = 0;
-    int m_loopTimes = 0;
+    qint64 m_frameRate = 0;
+    qint64 m_duration = 0;
+    qint64 m_loops = 0;
+    qint64 m_loopTimes = 0;
     bool m_shouldStop = false;
+    qreal m_devicePixelRatio = 0.0;
 };

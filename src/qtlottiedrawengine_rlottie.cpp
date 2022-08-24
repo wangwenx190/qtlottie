@@ -28,8 +28,9 @@
 #include <QtCore/qdebug.h>
 #include <QtCore/qfile.h>
 #include <QtCore/qvariant.h>
-#include <QtCore/qcoreapplication.h>
 #include <QtCore/qmutex.h>
+#include <QtGui/qscreen.h>
+#include <QtGui/qguiapplication.h>
 
 static constexpr const char kFileName[] = "QTLOTTIE_RLOTTIE_FILENAME";
 
@@ -166,6 +167,11 @@ Q_GLOBAL_STATIC(rlottie_data, rlottie)
 QtLottieRLottieEngine::QtLottieRLottieEngine(QObject *parent) : QtLottieDrawEngine(parent)
 {
     if (rlottie()->isLoaded()) {
+        if (const auto screen = QGuiApplication::primaryScreen()) {
+            m_devicePixelRatio = screen->devicePixelRatio();
+        } else {
+            m_devicePixelRatio = 1.0;
+        }
         const QMutexLocker locker(&rlottie()->mutex);
         rlottie()->lottie_init_pfn();
     } else {
@@ -237,8 +243,8 @@ bool QtLottieRLottieEngine::setSource(const QUrl &value)
     m_source = value;
     rlottie()->mutex.lock();
     rlottie()->lottie_animation_get_size_pfn(m_animation, reinterpret_cast<size_t *>(&m_width), reinterpret_cast<size_t *>(&m_height));
-    m_frameRate = rlottie()->lottie_animation_get_framerate_pfn(m_animation);
-    m_duration = rlottie()->lottie_animation_get_duration_pfn(m_animation);
+    m_frameRate = qRound64(rlottie()->lottie_animation_get_framerate_pfn(m_animation));
+    m_duration = qRound64(rlottie()->lottie_animation_get_duration_pfn(m_animation));
     m_totalFrame = rlottie()->lottie_animation_get_totalframe_pfn(m_animation);
     rlottie()->mutex.unlock();
     m_frameBuffer.reset(new char[m_width * m_height * 32 / 8]);
@@ -254,27 +260,27 @@ bool QtLottieRLottieEngine::setSource(const QUrl &value)
     return true;
 }
 
-qreal QtLottieRLottieEngine::frameRate() const
+qint64 QtLottieRLottieEngine::frameRate() const
 {
     return m_frameRate;
 }
 
-qreal QtLottieRLottieEngine::duration() const
+qint64 QtLottieRLottieEngine::duration() const
 {
     return m_duration;
 }
 
-QSizeF QtLottieRLottieEngine::size() const
+QSize QtLottieRLottieEngine::size() const
 {
-    return {static_cast<qreal>(m_width), static_cast<qreal>(m_height)};
+    return {int(m_width), int(m_height)};
 }
 
-int QtLottieRLottieEngine::loops() const
+qint64 QtLottieRLottieEngine::loops() const
 {
     return m_loops;
 }
 
-void QtLottieRLottieEngine::setLoops(const int value)
+void QtLottieRLottieEngine::setLoops(const qint64 value)
 {
     if (m_loops != value) {
         m_loops = value;
@@ -296,6 +302,20 @@ bool QtLottieRLottieEngine::playing() const
     return (m_animation && !m_shouldStop);
 }
 
+qreal QtLottieRLottieEngine::devicePixelRatio() const
+{
+    return m_devicePixelRatio;
+}
+
+void QtLottieRLottieEngine::setDevicePixelRatio(const qreal value)
+{
+    if (qFuzzyCompare(m_devicePixelRatio, value)) {
+        return;
+    }
+    m_devicePixelRatio = value;
+    Q_EMIT devicePixelRatioChanged(m_devicePixelRatio);
+}
+
 void QtLottieRLottieEngine::pause()
 {
     if (m_animation && !m_shouldStop) {
@@ -312,7 +332,7 @@ void QtLottieRLottieEngine::resume()
     }
 }
 
-void QtLottieRLottieEngine::paint(QPainter *painter, const QSizeF &s)
+void QtLottieRLottieEngine::paint(QPainter *painter, const QSize &s)
 {
     Q_ASSERT(painter);
     if (!painter) {
@@ -341,10 +361,10 @@ void QtLottieRLottieEngine::paint(QPainter *painter, const QSizeF &s)
     }
     // TODO: let the user be able to set the scale mode.
     // "Qt::SmoothTransformation" is a must otherwise the scaled image will become fuzzy.
-    painter->drawImage(QPointF{0, 0}, (s == size()) ? image : image.scaled(s.toSize(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+    painter->drawImage(QPoint{0, 0}, (s == size()) ? image : image.scaled(s, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 }
 
-void QtLottieRLottieEngine::render(const QSizeF &s)
+void QtLottieRLottieEngine::render(const QSize &s)
 {
     Q_UNUSED(s);
     if (!m_animation) {

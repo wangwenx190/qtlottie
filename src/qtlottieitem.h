@@ -39,11 +39,12 @@ class QTLOTTIE_API QtLottieItem : public QQuickPaintedItem
 #endif
     Q_PROPERTY(QString backend READ backend CONSTANT FINAL)
     Q_PROPERTY(QUrl source READ source WRITE setSource NOTIFY sourceChanged FINAL)
-    Q_PROPERTY(qreal frameRate READ frameRate NOTIFY frameRateChanged FINAL)
-    Q_PROPERTY(qreal duration READ duration NOTIFY durationChanged FINAL)
+    Q_PROPERTY(qint64 frameRate READ frameRate NOTIFY frameRateChanged FINAL)
+    Q_PROPERTY(qint64 duration READ duration NOTIFY durationChanged FINAL)
     Q_PROPERTY(QSizeF sourceSize READ sourceSize NOTIFY sourceSizeChanged FINAL)
-    Q_PROPERTY(int loops READ loops WRITE setLoops NOTIFY loopsChanged FINAL)
+    Q_PROPERTY(qint64 loops READ loops WRITE setLoops NOTIFY loopsChanged FINAL)
     Q_PROPERTY(bool available READ available CONSTANT FINAL)
+    Q_PROPERTY(qreal devicePixelRatio READ devicePixelRatio WRITE setDevicePixelRatio NOTIFY devicePixelRatioChanged FINAL)
 
 public:
     explicit QtLottieItem(QQuickItem *parent = nullptr);
@@ -56,16 +57,19 @@ public:
     QUrl source() const;
     void setSource(const QUrl &value);
 
-    qreal frameRate() const;
+    qint64 frameRate() const;
 
-    qreal duration() const;
+    qint64 duration() const;
 
     QSizeF sourceSize() const;
 
-    int loops() const;
-    void setLoops(const int value);
+    qint64 loops() const;
+    void setLoops(const qint64 value);
 
     bool available() const;
+
+    qreal devicePixelRatio() const;
+    void setDevicePixelRatio(const qreal value);
 
 public Q_SLOTS:
     void dispose();
@@ -74,10 +78,11 @@ public Q_SLOTS:
 
 Q_SIGNALS:
     void sourceChanged(const QUrl &);
-    void frameRateChanged(qreal);
-    void durationChanged(qreal);
+    void frameRateChanged(qint64);
+    void durationChanged(qint64);
     void sourceSizeChanged(const QSizeF &);
-    void loopsChanged(int);
+    void loopsChanged(qint64);
+    void devicePixelRatioChanged(qreal);
 
 private:
     QUrl m_source = {};
